@@ -1,0 +1,31 @@
+# https://taskfile.dev
+version: "3"
+
+tasks:
+  default:
+    cmds:
+      - go run ./dotbot {{.CLI_ARGS}}
+    silent: true
+
+  run-wsl:
+    desc: "Run inside WSL"
+    cmds:
+      - wsl -e go run ./dotbot {{.CLI_ARGS}}
+    preconditions:
+      - sh: command -v wsl
+        msg: "WSL is not installed"
+      - sh: wsl -- command -v go
+        msg: "go binary is not available in WSL"
+    silent: true
+
+  build:
+    desc: Build local binary
+    vars:
+      GOOS: "{{if .GOOS}}{{.GOOS}}{{else}}{{OS}}{{end}}"
+      GOARCH: "{{if .GOARCH}}{{.GOARCH}}{{else}}{{ARCH}}{{end}}"
+      EXT: "{{if eq .GOOS \"windows\"}}.exe{{else}}{{end}}"
+    cmds:
+      - go build -o "dotbot.{{.GOOS}}.{{.GOARCH}}{{.EXT}}" ./dotbot
+    env:
+      GOOS: "{{.GOOS}}"
+      GOARCH: "{{.GOARCH}}"
