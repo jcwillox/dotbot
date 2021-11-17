@@ -17,7 +17,7 @@ import (
 type Base []Config
 
 type Config struct {
-	Path      utils.ExpandedPath
+	Path      string
 	Force     bool
 	Recursive bool
 }
@@ -53,11 +53,12 @@ func (b Base) RunAll() error {
 var logger = log.GetLogger(emerald.Red, "CLEAN", emerald.LightBlack)
 
 func (c Config) Run() error {
-	return filepath.Walk(c.Path.String(), func(path string, info fs.FileInfo, err error) error {
+	path := utils.ExpandUser(c.Path)
+	err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
 		if err != nil {
 			return err
 		}
-		if c.Path.String() == path {
+		if c.Path == path {
 			return nil
 		}
 		if !c.Recursive && info.IsDir() {
@@ -85,4 +86,8 @@ func (c Config) Run() error {
 		}
 		return nil
 	})
+	if os.IsNotExist(err) {
+		return nil
+	}
+	return err
 }
