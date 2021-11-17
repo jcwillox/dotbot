@@ -32,6 +32,11 @@ tasks:
       GOOS: "{{.GOOS}}"
       GOARCH: "{{.GOARCH}}"
 
+  clean:
+    desc: Remove temporary files
+    cmds:
+      - python ./scripts/clean.py
+
   add_plugin:
     desc: Scaffolds a new plugin
     cmds:
