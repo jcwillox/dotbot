@@ -13,7 +13,7 @@ var location string
 
 var BaseDirectory string
 var HomeDirectory string
-var DryRun bool = true
+var DryRun = false
 
 const storePerm os.FileMode = 0600
 
@@ -89,4 +89,7 @@ func init() {
 	location = getLocation()
 	Load()
 	BaseDirectory = Get("directory")
+	if dryRun := os.Getenv("DRY_RUN"); dryRun == "true" {
+		DryRun = true
+	}
 }

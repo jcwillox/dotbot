@@ -3,6 +3,8 @@ version: "3"
 
 tasks:
   default:
+    env:
+      DRY_RUN: true
     cmds:
       - go run ./dotbot {{.CLI_ARGS}}
     silent: true
