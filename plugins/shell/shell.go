@@ -22,6 +22,22 @@ type Config struct {
 	Command utils.Command `yaml:",inline"`
 }
 
+func (c *Config) UnmarshalYAML(n *yaml.Node) error {
+	if n.Kind == yaml.ScalarNode {
+		n = &yaml.Node{
+			Kind: yaml.MappingNode,
+			Tag:  "!!map",
+			Content: []*yaml.Node{{
+				Kind:  yaml.ScalarNode,
+				Tag:   "!!str",
+				Value: "command",
+			}, n},
+		}
+	}
+	type ConfigT Config
+	return n.Decode((*ConfigT)(c))
+}
+
 func (b Base) Enabled() bool {
 	return true
 }
