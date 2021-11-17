@@ -39,10 +39,20 @@ func (b Base) RunAll() error {
 var logger = log.GetLogger(emerald.Magenta, "SHELL", emerald.LightBlack)
 
 func (c Config) Run() error {
+	logger.Log()
 	if c.Desc == "" {
-		logger.Log(c.Command.ShortString())
+		logger.Print(emerald.Yellow, c.Command.ShortString(), " ")
+		if c.Command.Sudo || (c.Command.TrySudo && utils.CanSudo()) {
+			logger.TagC(emerald.Blue, "sudo")
+		}
+		logger.Println()
 	} else {
-		logger.Log(c.Desc, emerald.LightBlack, " ["+c.Command.ShortString()+"]")
+		logger.Print(emerald.Yellow, c.Desc, " ")
+		if c.Command.Sudo || (c.Command.TrySudo && utils.CanSudo()) {
+			logger.TagC(emerald.Blue, "sudo")
+		}
+		logger.Print(emerald.LightBlack, "[", c.Command.ShortString(), "]\n")
+
 	}
 
 	cmd, err := c.Command.Cmd()

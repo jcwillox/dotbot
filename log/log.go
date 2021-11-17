@@ -33,11 +33,42 @@ func (l Logger) directive() {
 	emerald.Print(l.name, emerald.Reset, "] ")
 }
 
-// Log [<color><tag>] <msg>
-func (l Logger) Log(a ...interface{}) {
-	l.directive()
+func (l *Logger) Print(a ...interface{}) *Logger {
 	emerald.Print(a...)
-	emerald.Println(emerald.Reset)
+	emerald.Print(emerald.Reset)
+	return l
+}
+
+func (l *Logger) Printf(format string, a ...interface{}) *Logger {
+	emerald.Printf(format, a...)
+	emerald.Print(emerald.Reset)
+	return l
+}
+
+func (l *Logger) Println(a ...interface{}) *Logger {
+	emerald.Println(a...)
+	emerald.Print(emerald.Reset)
+	return l
+}
+
+func (l *Logger) Tag(tag string) *Logger {
+	l.tag(tag, l.tagColor)
+	return l
+}
+
+func (l *Logger) TagC(color, tag string) *Logger {
+	l.tag(tag, color)
+	return l
+}
+
+func (l *Logger) Path(path1, path2 string) *Logger {
+	emerald.Print(path1, emerald.LightBlack, " -> ", emerald.Reset, path2, "\n")
+	return l
+}
+
+func (l *Logger) Log() *Logger {
+	l.directive()
+	return l
 }
 
 // LogTag [<color><tag>] <grey><tag> <msg>
@@ -55,10 +86,15 @@ func (l Logger) LogTagC(color string, tag string, a ...interface{}) {
 	emerald.Println(emerald.Reset)
 }
 
-// LogPath [<color><tag>] <grey><tag> <path1> <grey>-> <path2>
 func (l Logger) LogPath(tag string, path1 string, path2 string) {
 	l.directive()
 	l.tag(tag, l.tagColor)
+	emerald.Print(path1, emerald.LightBlack, " -> ", emerald.Reset, path2, "\n")
+}
+
+func (l Logger) LogPathC(color string, tag string, path1 string, path2 string) {
+	l.directive()
+	l.tag(tag, color)
 	emerald.Print(path1, emerald.LightBlack, " -> ", emerald.Reset, path2, "\n")
 }
 
