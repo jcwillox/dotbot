@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"github.com/jcwillox/dotbot/plugins"
+	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/emerald"
 	"github.com/spf13/cobra"
 	"log"
+	"os"
 )
 
 var (
@@ -17,7 +19,13 @@ var rootCmd = &cobra.Command{
 	Short:   "",
 	Version: "0.0.1",
 	Run: func(cmd *cobra.Command, args []string) {
-		config, err := plugins.ReadConfig("samples/config.yaml")
+		if store.BaseDirectory != "" {
+			err := os.Chdir(store.BaseDirectory)
+			if err != nil {
+				log.Fatalln("Unable to access dotfiles directory", err)
+			}
+		}
+		config, err := plugins.ReadConfig("config.yaml")
 		if err != nil {
 			log.Panicln("Failed reading config file", err)
 		}
