@@ -43,7 +43,7 @@ func (c Command) Cmd() (*execabs.Cmd, error) {
 	if c.Shell {
 		shell, args := GetShellCommand(c.Command)
 		if sudo {
-			cmd = execabs.Command("sudo", append([]string{shell}, args...)...)
+			cmd = execabs.Command("sudo", append([]string{"-E", shell}, args...)...)
 		} else {
 			cmd = execabs.Command(shell, args...)
 		}
@@ -53,7 +53,7 @@ func (c Command) Cmd() (*execabs.Cmd, error) {
 			return nil, err
 		}
 		if sudo {
-			cmd = execabs.Command("sudo", args...)
+			cmd = execabs.Command("sudo", append([]string{"-E"}, args...)...)
 		} else {
 			cmd = execabs.Command(args[0], args[1:]...)
 		}
@@ -73,7 +73,7 @@ func (c Command) Cmd() (*execabs.Cmd, error) {
 }
 
 func (c Command) needsSudo() (bool, error) {
-	if c.Sudo || c.TrySudo {
+	if !IsRoot() && (c.Sudo || c.TrySudo) {
 		if CanSudo() {
 			c.Stdin = true
 			return true, nil
