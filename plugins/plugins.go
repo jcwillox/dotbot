@@ -1,7 +1,6 @@
 package plugins
 
 import (
-	"errors"
 	"fmt"
 	"github.com/jcwillox/dotbot/plugins/clean"
 	"github.com/jcwillox/dotbot/plugins/create"
@@ -26,9 +25,7 @@ func getDirective(key string) Plugin {
 }
 
 func (c *Config) UnmarshalYAML(n *yaml.Node) error {
-	if n.Kind != yaml.SequenceNode {
-		return errors.New("must be a list of directives")
-	}
+	n = yamltools.EnsureList(n)
 	*c = make(Config, len(n.Content))
 	for i, node := range n.Content {
 		// range over keys
@@ -52,12 +49,16 @@ type Plugin interface {
 }
 
 func ReadConfig(path string) (Config, error) {
-	config := make(Config, 0, 5)
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
-	err = yaml.Unmarshal(data, &config)
+	return FromBytes(data)
+}
+
+func FromBytes(data []byte) (Config, error) {
+	config := make(Config, 0, 5)
+	err := yaml.Unmarshal(data, &config)
 	if err != nil {
 		return nil, err
 	}
