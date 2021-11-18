@@ -15,7 +15,7 @@ type Command struct {
 	Command string
 	Shell   bool `default:"true"`
 	// Enable writing to stdin
-	Stdin bool
+	Stdin bool `default:"true"`
 	// Enable piping to stdout
 	Stdout bool `default:"true"`
 	// Enable piping to stderr
