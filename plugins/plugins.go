@@ -5,6 +5,7 @@ import (
 	"github.com/jcwillox/dotbot/plugins/clean"
 	"github.com/jcwillox/dotbot/plugins/create"
 	"github.com/jcwillox/dotbot/plugins/download"
+	"github.com/jcwillox/dotbot/plugins/git"
 	"github.com/jcwillox/dotbot/plugins/link"
 	"github.com/jcwillox/dotbot/plugins/shell"
 	"github.com/jcwillox/dotbot/yamltools"
@@ -18,6 +19,7 @@ func getDirective(key string) Plugin {
 	return map[string]Plugin{
 		"clean":    &clean.Base{},
 		"create":   &create.Base{},
+		"git":      &git.Base{},
 		"download": &download.Base{},
 		"link":     &link.Base{},
 		"shell":    &shell.Base{},
