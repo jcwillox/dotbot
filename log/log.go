@@ -2,6 +2,7 @@ package log
 
 import (
 	"github.com/jcwillox/emerald"
+	"os"
 )
 
 func GetLogger(color string, name string, tagColor string) Logger {
@@ -18,11 +19,12 @@ type Logger struct {
 	tagColor string
 }
 
-func (l Logger) tag(tag string, color string) {
+func (l *Logger) tag(tag string, color string) *Logger {
 	if !emerald.ColorEnabled {
 		color = ""
 	}
 	emerald.Print(color, "[", tag, "] ", emerald.Reset)
+	return l
 }
 
 func (l Logger) directive() {
@@ -52,12 +54,23 @@ func (l *Logger) Println(a ...interface{}) *Logger {
 }
 
 func (l *Logger) Tag(tag string) *Logger {
-	l.tag(tag, l.tagColor)
-	return l
+	return l.tag(tag, l.tagColor)
 }
 
 func (l *Logger) TagC(color, tag string) *Logger {
-	l.tag(tag, color)
+	return l.tag(tag, color)
+}
+
+func (l *Logger) Sudo(sudo ...bool) *Logger {
+	return l.SudoC(emerald.Magenta, sudo...)
+}
+
+func (l *Logger) SudoC(color string, sudo ...bool) *Logger {
+	if len(sudo) > 0 && sudo[0] {
+		return l.tag("sudo", color)
+	} else if _, present := os.LookupEnv("DOTBOT_SUDO"); present {
+		return l.tag("sudo", color)
+	}
 	return l
 }
 
