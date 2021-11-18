@@ -10,7 +10,8 @@ import (
 )
 
 var (
-	color string
+	color  string
+	dryRun bool
 )
 
 // rootCmd represents the base command when called without any subcommands
@@ -41,7 +42,9 @@ func init() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVar(&color, "color", "auto", "when to use colors (always, auto, never)")
 	rootCmd.PersistentFlags().BoolP("help", "h", false, "help for dotbot")
-	rootCmd.RegisterFlagCompletionFunc("color", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "enable dry run mode")
+
+	_ = rootCmd.RegisterFlagCompletionFunc("color", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return []string{"auto", "always", "never"}, cobra.ShellCompDirectiveNoFileComp
 	})
 }
@@ -55,5 +58,9 @@ func initConfig() {
 		emerald.SetColorState(true)
 	case "never":
 		emerald.SetColorState(false)
+	}
+
+	if rootCmd.PersistentFlags().Changed("dry-run") {
+		store.DryRun = dryRun
 	}
 }
