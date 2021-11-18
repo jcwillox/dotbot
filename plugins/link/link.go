@@ -3,6 +3,7 @@ package link
 import (
 	"errors"
 	"fmt"
+	"github.com/creasty/defaults"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/utils"
@@ -21,15 +22,25 @@ func (b *Base) UnmarshalYAML(n *yaml.Node) error {
 }
 
 type Config struct {
-	Path   string
+	Path   string `yaml:",omitempty"`
 	Source string
+	Mkdirs bool `default:"true"`
+	Force  bool
 }
 
 func (c *Config) UnmarshalYAML(n *yaml.Node) error {
+	defaults.MustSet(c)
 	n = yamltools.KeyValToNamedMap(n, "path", "source")
 	n = yamltools.KeyMapToNamedMap(n, "path")
 	type ConfigT Config
 	return n.Decode((*ConfigT)(c))
+}
+
+func (c *Config) MarshalYAML() (interface{}, error) {
+	path := c.Path
+	c.Path = ""
+	type ConfigT Config
+	return map[string]*ConfigT{path: (*ConfigT)(c)}, nil
 }
 
 func (b Base) Enabled() bool {
@@ -39,14 +50,21 @@ func (b Base) Enabled() bool {
 func (b Base) RunAll() error {
 	for _, config := range b {
 		err := config.Run()
-		if err != nil {
+		if utils.IsPermError(err) && utils.WouldSudo() {
+			absSource, _ := filepath.Abs(config.Source)
+			logger.Log().Tag("linking").Sudo(true).Path(
+				emerald.HighlightPath(config.Path, os.ModeSymlink),
+				emerald.HighlightPathStat(absSource),
+			)
+			return utils.SudoConfig("link", &config)
+		} else if err != nil {
 			fmt.Println("error:", err)
 		}
 	}
 	return nil
 }
 
-var logger = log.GetLogger(emerald.Cyan, "LINK", emerald.LightBlack)
+var logger = log.GetLogger(emerald.ColorCode("cyan+b"), "LINK", emerald.Yellow)
 
 func (c Config) Run() error {
 	sourceStat, err := os.Lstat(c.Source)
@@ -56,40 +74,72 @@ func (c Config) Run() error {
 	path := utils.ExpandUser(c.Path)
 	// check if link exists
 	pathStat, err := os.Lstat(path)
-	if !os.IsNotExist(err) {
-		// check is link
-		if pathStat.Mode()&os.ModeSymlink == 0 {
-			// physical file exists where link wants to be placed
-			return nil
-		}
-		dest, err := os.Readlink(path)
-		if err != nil {
-			return err
-		}
-		destStat, _ := os.Lstat(dest)
-		// check link is already to correct dest
-		if os.SameFile(destStat, sourceStat) {
-			// link is correct
-			logger.LogPath(
-				"exists",
-				emerald.HighlightPathStat(c.Path, pathStat),
-				emerald.HighlightPathStat(dest, destStat),
-			)
-		}
-	} else {
-		// destination doesn't exist so create link
-		absSource, _ := filepath.Abs(c.Source)
-		if !store.DryRun {
-			err := os.Symlink(absSource, c.Path)
+	if err != nil && !os.IsNotExist(err) {
+		return err // general stat error
+	}
+	if err == nil {
+		// target exists
+		// check if physical file exists where link wants to be placed
+		if pathStat.Mode()&os.ModeSymlink != 0 {
+			// check if link is already correct
+			dest, err := os.Readlink(path)
 			if err != nil {
 				return err
 			}
+			destStat, err := os.Lstat(dest)
+			if err != nil && !os.IsNotExist(err) {
+				return err // general stat error
+			}
+			// check link is already to correct dest
+			if os.SameFile(destStat, sourceStat) {
+				// link is correct
+				logger.LogPathC(
+					emerald.LightBlack,
+					"valid",
+					emerald.HighlightPathStat(c.Path, pathStat),
+					emerald.HighlightPathStat(dest, destStat),
+				)
+				return nil
+			}
 		}
-		logger.LogPath(
-			"created",
-			emerald.HighlightPath(c.Path, os.ModeSymlink),
-			emerald.HighlightPathStat(absSource, sourceStat),
-		)
+		if c.Force {
+			if !utils.IsWritable(path) {
+				return os.ErrPermission
+			}
+			err := os.Remove(path)
+			if err != nil {
+				return err
+			}
+			logger.Log().TagC(emerald.Red, "deleted").Println(emerald.HighlightPathStat(c.Path, pathStat))
+		} else {
+			return errors.New("failed to create link as target already exists")
+		}
 	}
+
+	// at this point the target does not exist
+	if c.Mkdirs {
+		err := os.MkdirAll(filepath.Dir(path), 0755)
+		if err != nil {
+			return err
+		}
+	}
+
+	// check we can create links in the directory
+	if !utils.IsWritable(filepath.Dir(path)) {
+		return os.ErrPermission
+	}
+
+	absSource, _ := filepath.Abs(c.Source)
+	if !store.DryRun {
+		err := os.Symlink(absSource, path)
+		if err != nil {
+			return err
+		}
+	}
+
+	logger.Log().Tag("linked").Sudo().Path(
+		emerald.HighlightPath(c.Path, os.ModeSymlink),
+		emerald.HighlightPathStat(absSource, sourceStat),
+	)
 	return nil
 }
