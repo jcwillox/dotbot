@@ -1,4 +1,4 @@
-package shell
+package plugins
 
 import (
 	"fmt"
@@ -9,20 +9,20 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Base []Config
+type ShellBase []ShellConfig
 
-func (b *Base) UnmarshalYAML(n *yaml.Node) error {
+func (b *ShellBase) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.EnsureList(n)
-	type BaseT Base
-	return n.Decode((*BaseT)(b))
+	type ShellBaseT ShellBase
+	return n.Decode((*ShellBaseT)(b))
 }
 
-type Config struct {
+type ShellConfig struct {
 	Desc    string
 	Command utils.Command `yaml:",inline"`
 }
 
-func (c *Config) UnmarshalYAML(n *yaml.Node) error {
+func (c *ShellConfig) UnmarshalYAML(n *yaml.Node) error {
 	if n.Kind == yaml.ScalarNode {
 		n = &yaml.Node{
 			Kind: yaml.MappingNode,
@@ -34,15 +34,15 @@ func (c *Config) UnmarshalYAML(n *yaml.Node) error {
 			}, n},
 		}
 	}
-	type ConfigT Config
-	return n.Decode((*ConfigT)(c))
+	type ShellConfigT ShellConfig
+	return n.Decode((*ShellConfigT)(c))
 }
 
-func (b Base) Enabled() bool {
+func (b ShellBase) Enabled() bool {
 	return true
 }
 
-func (b Base) RunAll() error {
+func (b ShellBase) RunAll() error {
 	for _, config := range b {
 		err := config.Run()
 		if err != nil {
@@ -52,22 +52,22 @@ func (b Base) RunAll() error {
 	return nil
 }
 
-var logger = log.GetLogger(emerald.Magenta, "SHELL", emerald.LightBlack)
+var shellLogger = log.GetLogger(emerald.Magenta, "SHELL", emerald.LightBlack)
 
-func (c Config) Run() error {
-	logger.Log()
+func (c ShellConfig) Run() error {
+	shellLogger.Log()
 	if c.Desc == "" {
-		logger.Print(emerald.Yellow, c.Command.ShortString(), " ")
+		shellLogger.Print(emerald.Yellow, c.Command.ShortString(), " ")
 		if c.Command.Sudo || (c.Command.TrySudo && utils.CanSudo()) {
-			logger.TagC(emerald.Blue, "sudo")
+			shellLogger.TagC(emerald.Blue, "sudo")
 		}
-		logger.Println()
+		shellLogger.Println()
 	} else {
-		logger.Print(emerald.Yellow, c.Desc, " ")
+		shellLogger.Print(emerald.Yellow, c.Desc, " ")
 		if c.Command.Sudo || (c.Command.TrySudo && utils.CanSudo()) {
-			logger.TagC(emerald.Blue, "sudo")
+			shellLogger.TagC(emerald.Blue, "sudo")
 		}
-		logger.Print(emerald.LightBlack, "[", c.Command.ShortString(), "]\n")
+		shellLogger.Print(emerald.LightBlack, "[", c.Command.ShortString(), "]\n")
 
 	}
 

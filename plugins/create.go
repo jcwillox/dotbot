@@ -1,4 +1,4 @@
-package create
+package plugins
 
 import (
 	"errors"
@@ -12,26 +12,26 @@ import (
 	"os"
 )
 
-type Base []Config
+type CreateBase []CreateConfig
 
-func (b *Base) UnmarshalYAML(n *yaml.Node) error {
+func (b *CreateBase) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.MapSlice(n)
 	n = yamltools.EnsureList(n)
-	type BaseT Base
-	return n.Decode((*BaseT)(b))
+	type CreateBaseT CreateBase
+	return n.Decode((*CreateBaseT)(b))
 }
 
-type Config struct {
+type CreateConfig struct {
 	Path string `yaml:",omitempty"`
 	Mode os.FileMode
 }
 
-func (c *Config) UnmarshalYAML(n *yaml.Node) error {
+func (c *CreateConfig) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.EnsureMap(n)
 	n = yamltools.KeyValToNamedMap(n, "path", "mode")
 	n = yamltools.KeyMapToNamedMap(n, "path")
-	type ConfigT Config
-	err := n.Decode((*ConfigT)(c))
+	type CreateConfigT CreateConfig
+	err := n.Decode((*CreateConfigT)(c))
 	if err != nil {
 		return err
 	}
@@ -42,26 +42,26 @@ func (c *Config) UnmarshalYAML(n *yaml.Node) error {
 	return nil
 }
 
-func (c *Config) MarshalYAML() (interface{}, error) {
+func (c *CreateConfig) MarshalYAML() (interface{}, error) {
 	path := c.Path
 	c.Path = ""
-	type ConfigT Config
-	return map[string]*ConfigT{path: (*ConfigT)(c)}, nil
+	type CreateConfigT CreateConfig
+	return map[string]*CreateConfigT{path: (*CreateConfigT)(c)}, nil
 }
 
-func (b Base) Enabled() bool {
+func (b CreateBase) Enabled() bool {
 	return true
 }
 
 var nonExistentPath = emerald.ColorFunc("red+u")
 
-func (b Base) RunAll() error {
+func (b CreateBase) RunAll() error {
 	hasError := false
 	for _, config := range b {
 		err := config.Run()
 		if utils.IsPermError(err) && utils.WouldSudo() {
 			// let user know why we want to sudo
-			logger.Log().TagC(emerald.Yellow, "creating").Sudo(true).Print(
+			createLogger.Log().TagC(emerald.Yellow, "creating").Sudo(true).Print(
 				emerald.HighlightFileMode(config.Mode), " ", emerald.HighlightPath(config.Path, os.ModeDir), "\n",
 			)
 			return utils.SudoConfig("create", &config)
@@ -78,9 +78,9 @@ func (b Base) RunAll() error {
 	return nil
 }
 
-var logger = log.GetLogger(emerald.ColorCode("green+b"), "CREATE", emerald.Yellow)
+var createLogger = log.GetLogger(emerald.ColorCode("green+b"), "CREATE", emerald.Yellow)
 
-func (c Config) Run() error {
+func (c CreateConfig) Run() error {
 	path := utils.ExpandUser(c.Path)
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
@@ -90,13 +90,13 @@ func (c Config) Run() error {
 				return err
 			}
 		}
-		logger.Log().TagC(emerald.Yellow, "created").Sudo().Print(
+		createLogger.Log().TagC(emerald.Yellow, "created").Sudo().Print(
 			emerald.HighlightFileMode(c.Mode), " ", emerald.HighlightPath(c.Path, os.ModeDir),
 		).Println()
 	} else if err != nil {
 		return err
 	} else {
-		logger.LogTagC(emerald.LightBlack, "exists", emerald.HighlightPath(c.Path, os.ModeDir))
+		createLogger.LogTagC(emerald.LightBlack, "exists", emerald.HighlightPath(c.Path, os.ModeDir))
 	}
 	return nil
 }

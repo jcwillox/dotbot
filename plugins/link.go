@@ -1,4 +1,4 @@
-package link
+package plugins
 
 import (
 	"errors"
@@ -14,45 +14,45 @@ import (
 	"path/filepath"
 )
 
-type Base []Config
+type LinkBase []LinkConfig
 
-func (b *Base) UnmarshalYAML(n *yaml.Node) error {
-	type BaseT Base
-	return yamltools.MapSlice(yamltools.EnsureFlatList(n)).Decode((*BaseT)(b))
+func (b *LinkBase) UnmarshalYAML(n *yaml.Node) error {
+	type LinkBaseT LinkBase
+	return yamltools.MapSlice(yamltools.EnsureFlatList(n)).Decode((*LinkBaseT)(b))
 }
 
-type Config struct {
+type LinkConfig struct {
 	Path   string `yaml:",omitempty"`
 	Source string
 	Mkdirs bool `default:"true"`
 	Force  bool
 }
 
-func (c *Config) UnmarshalYAML(n *yaml.Node) error {
+func (c *LinkConfig) UnmarshalYAML(n *yaml.Node) error {
 	defaults.MustSet(c)
 	n = yamltools.KeyValToNamedMap(n, "path", "source")
 	n = yamltools.KeyMapToNamedMap(n, "path")
-	type ConfigT Config
-	return n.Decode((*ConfigT)(c))
+	type LinkConfigT LinkConfig
+	return n.Decode((*LinkConfigT)(c))
 }
 
-func (c *Config) MarshalYAML() (interface{}, error) {
+func (c *LinkConfig) MarshalYAML() (interface{}, error) {
 	path := c.Path
 	c.Path = ""
-	type ConfigT Config
-	return map[string]*ConfigT{path: (*ConfigT)(c)}, nil
+	type LinkConfigT LinkConfig
+	return map[string]*LinkConfigT{path: (*LinkConfigT)(c)}, nil
 }
 
-func (b Base) Enabled() bool {
+func (b LinkBase) Enabled() bool {
 	return true
 }
 
-func (b Base) RunAll() error {
+func (b LinkBase) RunAll() error {
 	for _, config := range b {
 		err := config.Run()
 		if utils.IsPermError(err) && utils.WouldSudo() {
 			absSource, _ := filepath.Abs(config.Source)
-			logger.Log().Tag("linking").Sudo(true).Path(
+			linkLogger.Log().Tag("linking").Sudo(true).Path(
 				emerald.HighlightPath(config.Path, os.ModeSymlink),
 				emerald.HighlightPathStat(absSource),
 			)
@@ -64,9 +64,9 @@ func (b Base) RunAll() error {
 	return nil
 }
 
-var logger = log.GetLogger(emerald.ColorCode("cyan+b"), "LINK", emerald.Yellow)
+var linkLogger = log.GetLogger(emerald.ColorCode("cyan+b"), "LINK", emerald.Yellow)
 
-func (c Config) Run() error {
+func (c LinkConfig) Run() error {
 	sourceStat, err := os.Lstat(c.Source)
 	if os.IsNotExist(err) {
 		return errors.New("source does not exist")
@@ -93,7 +93,7 @@ func (c Config) Run() error {
 			// check link is already to correct dest
 			if os.SameFile(destStat, sourceStat) {
 				// link is correct
-				logger.LogPathC(
+				linkLogger.LogPathC(
 					emerald.LightBlack,
 					"valid",
 					emerald.HighlightPathStat(c.Path, pathStat),
@@ -110,7 +110,7 @@ func (c Config) Run() error {
 			if err != nil {
 				return err
 			}
-			logger.Log().TagC(emerald.Red, "deleted").Println(emerald.HighlightPathStat(c.Path, pathStat))
+			linkLogger.Log().TagC(emerald.Red, "deleted").Println(emerald.HighlightPathStat(c.Path, pathStat))
 		} else {
 			return errors.New("failed to create link as target already exists")
 		}
@@ -137,7 +137,7 @@ func (c Config) Run() error {
 		}
 	}
 
-	logger.Log().Tag("linked").Sudo().Path(
+	linkLogger.Log().Tag("linked").Sudo().Path(
 		emerald.HighlightPath(c.Path, os.ModeSymlink),
 		emerald.HighlightPathStat(absSource, sourceStat),
 	)

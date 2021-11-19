@@ -1,4 +1,4 @@
-package git
+package plugins
 
 import (
 	"bufio"
@@ -16,9 +16,9 @@ import (
 	"path/filepath"
 )
 
-type Base []Config
+type GitBase []GitConfig
 
-type Config struct {
+type GitConfig struct {
 	Path string
 	Url  string
 	Name string
@@ -27,25 +27,25 @@ type Config struct {
 	Shallow bool   `default:"true"`
 }
 
-func (b *Base) UnmarshalYAML(n *yaml.Node) error {
+func (b *GitBase) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.MapSlice(n)
-	type BaseT Base
-	return n.Decode((*BaseT)(b))
+	type GitBaseT GitBase
+	return n.Decode((*GitBaseT)(b))
 }
 
-func (c *Config) UnmarshalYAML(n *yaml.Node) error {
+func (c *GitConfig) UnmarshalYAML(n *yaml.Node) error {
 	defaults.MustSet(c)
 	n = yamltools.EnsureMapMap(n)
 	n = yamltools.KeyMapToNamedMap(n, "path")
-	type ConfigT Config
-	return n.Decode((*ConfigT)(c))
+	type GitConfigT GitConfig
+	return n.Decode((*GitConfigT)(c))
 }
 
-func (b Base) Enabled() bool {
+func (b GitBase) Enabled() bool {
 	return true
 }
 
-func (b Base) RunAll() error {
+func (b GitBase) RunAll() error {
 	for _, config := range b {
 		err := config.Run()
 		if err != nil {
@@ -55,9 +55,9 @@ func (b Base) RunAll() error {
 	return nil
 }
 
-var logger = log.GetLogger(emerald.ColorCode("yellow+b"), "GIT", emerald.Yellow)
+var gitLogger = log.GetLogger(emerald.ColorCode("yellow+b"), "GIT", emerald.Yellow)
 
-func (c Config) Run() error {
+func (c GitConfig) Run() error {
 	path := utils.ExpandUser(c.Path)
 	_, err := git.PlainOpen(path)
 	isNotExists := errors.Is(err, git.ErrRepositoryNotExists)
@@ -69,46 +69,46 @@ func (c Config) Run() error {
 	sudo := !utils.IsWritable(filepath.Dir(path))
 
 	logTail := func() {
-		logger.Sudo(sudo).Print(emerald.Blue, c.String(), "\n")
+		gitLogger.Sudo(sudo).Print(emerald.Blue, c.String(), "\n")
 	}
 
 	switch c.Method {
 	case "clone_pull":
 		if isNotExists {
-			logger.Log().Tag("cloning")
+			gitLogger.Log().Tag("cloning")
 			logTail()
 			return c.clonePath(path, sudo)
 		}
-		logger.Log().Tag("pulling")
+		gitLogger.Log().Tag("pulling")
 		logTail()
 		return c.pullPath(path, sudo)
 	case "clone":
 		if isNotExists {
-			logger.Log().Tag("cloning")
+			gitLogger.Log().Tag("cloning")
 			logTail()
 			return c.clonePath(path, sudo)
 		} else {
-			logger.LogTagC(emerald.LightBlack, "cloned", emerald.Blue, c)
+			gitLogger.LogTagC(emerald.LightBlack, "cloned", emerald.Blue, c)
 		}
 	case "pull":
 		if isNotExists {
 			return err
 		}
-		logger.Log().Tag("pulling")
+		gitLogger.Log().Tag("pulling")
 		logTail()
 		return c.pullPath(path, sudo)
 	}
 	return nil
 }
 
-func (c Config) String() string {
+func (c GitConfig) String() string {
 	if c.Name != "" {
 		return c.Name
 	}
 	return c.Url
 }
 
-func (c Config) clonePath(path string, sudo bool) error {
+func (c GitConfig) clonePath(path string, sudo bool) error {
 	if store.DryRun {
 		return nil
 	}
@@ -129,7 +129,7 @@ func (c Config) clonePath(path string, sudo bool) error {
 	return cmd.Run()
 }
 
-func (c Config) pullPath(path string, sudo bool) error {
+func (c GitConfig) pullPath(path string, sudo bool) error {
 	if store.DryRun {
 		return nil
 	}
@@ -157,7 +157,7 @@ func (c Config) pullPath(path string, sudo bool) error {
 			if emerald.ColorEnabled {
 				emerald.Print("\x1b[F\x1b[K")
 			}
-			logger.LogTagC(emerald.LightBlack, "up-to-date", emerald.Blue, c)
+			gitLogger.LogTagC(emerald.LightBlack, "up-to-date", emerald.Blue, c)
 		} else {
 			emerald.Print(out)
 		}

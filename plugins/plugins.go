@@ -2,33 +2,33 @@ package plugins
 
 import (
 	"fmt"
-	"github.com/jcwillox/dotbot/plugins/clean"
-	"github.com/jcwillox/dotbot/plugins/create"
-	"github.com/jcwillox/dotbot/plugins/download"
-	"github.com/jcwillox/dotbot/plugins/git"
-	"github.com/jcwillox/dotbot/plugins/link"
-	"github.com/jcwillox/dotbot/plugins/shell"
 	"github.com/jcwillox/dotbot/yamltools"
 	"gopkg.in/yaml.v3"
 	"os"
 )
 
-type Config []Plugin
+type PluginList []Plugin
+
+type Plugin interface {
+	Enabled() bool
+	RunAll() error
+}
 
 func getDirective(key string) Plugin {
 	return map[string]Plugin{
-		"clean":    &clean.Base{},
-		"create":   &create.Base{},
-		"git":      &git.Base{},
-		"download": &download.Base{},
-		"link":     &link.Base{},
-		"shell":    &shell.Base{},
+		"clean":    &CleanBase{},
+		"create":   &CreateBase{},
+		"git":      &GitBase{},
+		"group":    &GroupBase{},
+		"download": &DownloadBase{},
+		"link":     &LinkBase{},
+		"shell":    &ShellBase{},
 	}[key]
 }
 
-func (c *Config) UnmarshalYAML(n *yaml.Node) error {
+func (c *PluginList) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.EnsureList(n)
-	*c = make(Config, len(n.Content))
+	*c = make(PluginList, len(n.Content))
 	for i, node := range n.Content {
 		// range over keys
 		keys := yamltools.MapKeys(node)
@@ -45,12 +45,7 @@ func (c *Config) UnmarshalYAML(n *yaml.Node) error {
 	return nil
 }
 
-type Plugin interface {
-	Enabled() bool
-	RunAll() error
-}
-
-func ReadConfig(path string) (Config, error) {
+func ReadConfig(path string) (PluginList, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
 		return nil, err
@@ -58,8 +53,8 @@ func ReadConfig(path string) (Config, error) {
 	return FromBytes(data)
 }
 
-func FromBytes(data []byte) (Config, error) {
-	config := make(Config, 0, 5)
+func FromBytes(data []byte) (PluginList, error) {
+	config := make(PluginList, 0, 5)
 	err := yaml.Unmarshal(data, &config)
 	if err != nil {
 		return nil, err
@@ -67,7 +62,7 @@ func FromBytes(data []byte) (Config, error) {
 	return config, err
 }
 
-func (c Config) RunAll() {
+func (c PluginList) RunAll() {
 	errorCount := 0
 	for _, plugin := range c {
 		err := plugin.RunAll()

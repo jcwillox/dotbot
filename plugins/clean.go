@@ -1,4 +1,4 @@
-package clean
+package plugins
 
 import (
 	"fmt"
@@ -8,39 +8,38 @@ import (
 	"github.com/jcwillox/dotbot/yamltools"
 	"github.com/jcwillox/emerald"
 	"gopkg.in/yaml.v3"
-	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
 )
 
-type Base []Config
+type CleanBase []CleanConfig
 
-type Config struct {
+type CleanConfig struct {
 	Path      string
 	Force     bool
 	Recursive bool
 }
 
-func (b *Base) UnmarshalYAML(n *yaml.Node) error {
+func (b *CleanBase) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.MapSlice(n)
 	n = yamltools.EnsureList(n)
-	type BaseT Base
-	return n.Decode((*BaseT)(b))
+	type CleanBaseT CleanBase
+	return n.Decode((*CleanBaseT)(b))
 }
 
-func (c *Config) UnmarshalYAML(n *yaml.Node) error {
+func (c *CleanConfig) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.EnsureMapMap(n)
 	n = yamltools.KeyMapToNamedMap(n, "path")
-	type ConfigT Config
-	return n.Decode((*ConfigT)(c))
+	type CleanConfigT CleanConfig
+	return n.Decode((*CleanConfigT)(c))
 }
 
-func (b Base) Enabled() bool {
+func (b CleanBase) Enabled() bool {
 	return true
 }
 
-func (b Base) RunAll() error {
+func (b CleanBase) RunAll() error {
 	for _, config := range b {
 		err := config.Run()
 		if err != nil {
@@ -50,22 +49,22 @@ func (b Base) RunAll() error {
 	return nil
 }
 
-var logger = log.GetLogger(emerald.Red, "CLEAN", emerald.LightBlack)
+var cleanLogger = log.GetLogger(emerald.Red, "CLEAN", emerald.LightBlack)
 
-func (c Config) Run() error {
+func (c CleanConfig) Run() error {
 	path := utils.ExpandUser(c.Path)
-	err := filepath.Walk(path, func(path string, info fs.FileInfo, err error) error {
+	err := filepath.WalkDir(path, func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
 		if c.Path == path {
 			return nil
 		}
-		if !c.Recursive && info.IsDir() {
+		if !c.Recursive && entry.IsDir() {
 			return filepath.SkipDir
 		}
 		// ignore non-symlinks
-		if info.Mode()&os.ModeSymlink == 0 {
+		if entry.Type()&os.ModeSymlink == 0 {
 			return nil
 		}
 		dest, err := os.Readlink(path)
@@ -77,9 +76,10 @@ func (c Config) Run() error {
 		if !c.Force && (err != nil || strings.HasPrefix(rel, "..")) {
 			return nil
 		}
+		pathStat, _ := entry.Info()
 		// check dead link
 		if stat, err := os.Stat(dest); err != nil {
-			logger.LogPath("removing", emerald.HighlightPathStat(utils.ShrinkUser(path), info), emerald.HighlightPathStat(dest, stat))
+			cleanLogger.LogPath("removing", emerald.HighlightPathStat(utils.ShrinkUser(path), pathStat), emerald.HighlightPathStat(dest, stat))
 			if !store.DryRun {
 				return os.Remove(path)
 			}
