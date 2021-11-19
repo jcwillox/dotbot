@@ -11,7 +11,7 @@ parser.add_argument("--force", action="store_true")
 args = parser.parse_args()
 
 name: str = args.name
-path = f"plugins/{name}"
+path = "plugins"
 file_path = os.path.join(path, f"{name}.go")
 windows_file_path = os.path.join(path, f"{name}_windows.go")
 
@@ -19,10 +19,11 @@ if not os.path.isdir(path):
     os.mkdir(path)
 
 with open("scripts/plugin_template.go") as file:
-    plugin_template = (
+    plugin_template = "package plugins\n\n" + (
         file.read()
         .replace("//go:build ignore\n", "")
         .replace("// +build ignore\n\n", "")
+        .replace("package plugin\n\n", "")
         .replace("plugin", name)
         .replace("Plugin", name.title())
         .replace("PLUGIN", name.upper())

@@ -10,21 +10,21 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type Base []Config
+type PluginBase []PluginConfig
 
-type Config struct {
+type PluginConfig struct {
 }
 
-func (b *Base) UnmarshalYAML(n *yaml.Node) error {
-	type BaseT Base
-	return n.Decode((*BaseT)(b))
+func (b *PluginBase) UnmarshalYAML(n *yaml.Node) error {
+	type PluginBaseT PluginBase
+	return n.Decode((*PluginBaseT)(b))
 }
 
-func (b Base) Enabled() bool {
+func (b PluginBase) Enabled() bool {
 	return true
 }
 
-func (b Base) RunAll() error {
+func (b PluginBase) RunAll() error {
 	for _, config := range b {
 		err := config.Run()
 		if err != nil {
@@ -34,8 +34,8 @@ func (b Base) RunAll() error {
 	return nil
 }
 
-var logger = log.GetLogger(emerald.White, "PLUGIN", emerald.Blue)
+var pluginLogger = log.GetLogger(emerald.White, "PLUGIN", emerald.Blue)
 
-func (c Config) Run() error {
+func (c PluginConfig) Run() error {
 	return nil
 }
