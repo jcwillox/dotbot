@@ -28,15 +28,18 @@ type GitConfig struct {
 }
 
 func (b *GitBase) UnmarshalYAML(n *yaml.Node) error {
-	n = yamltools.MapSlice(n)
+	n = yamltools.MapToSliceMap(n)
 	type GitBaseT GitBase
 	return n.Decode((*GitBaseT)(b))
 }
 
 func (c *GitConfig) UnmarshalYAML(n *yaml.Node) error {
 	defaults.MustSet(c)
-	n = yamltools.EnsureMapMap(n)
-	n = yamltools.KeyMapToNamedMap(n, "path")
+	if yamltools.IsScalarMap(n) {
+		n = yamltools.MapSplitKeyVal(n, "path", "url")
+	} else {
+		n = yamltools.MapKeyIntoValueMap(n, "path")
+	}
 	type GitConfigT GitConfig
 	return n.Decode((*GitConfigT)(c))
 }

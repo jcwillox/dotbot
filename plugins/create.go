@@ -15,7 +15,7 @@ import (
 type CreateBase []CreateConfig
 
 func (b *CreateBase) UnmarshalYAML(n *yaml.Node) error {
-	n = yamltools.MapSlice(n)
+	n = yamltools.MapToSliceMap(n)
 	n = yamltools.EnsureList(n)
 	type CreateBaseT CreateBase
 	return n.Decode((*CreateBaseT)(b))
@@ -27,9 +27,12 @@ type CreateConfig struct {
 }
 
 func (c *CreateConfig) UnmarshalYAML(n *yaml.Node) error {
-	n = yamltools.EnsureMap(n)
-	n = yamltools.KeyValToNamedMap(n, "path", "mode")
-	n = yamltools.KeyMapToNamedMap(n, "path")
+	n = yamltools.ScalarToMap(n)
+	if yamltools.IsScalarMap(n) {
+		n = yamltools.MapSplitKeyVal(n, "path", "mode")
+	} else {
+		n = yamltools.MapKeyIntoValueMap(n, "path")
+	}
 	type CreateConfigT CreateConfig
 	err := n.Decode((*CreateConfigT)(c))
 	if err != nil {

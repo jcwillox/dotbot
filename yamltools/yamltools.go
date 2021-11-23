@@ -13,52 +13,72 @@ func MapKeys(n *yaml.Node) []string {
 	return []string{}
 }
 
-func KeyValToNamedMap(n *yaml.Node, key, val string) *yaml.Node {
-	if n.Kind == yaml.MappingNode {
-		if n.Content[0].Kind == yaml.ScalarNode && n.Content[1].Kind == yaml.ScalarNode {
-			return &yaml.Node{
-				Kind: yaml.MappingNode,
-				Tag:  "!!map",
-				Content: []*yaml.Node{
-					{
-						Kind:    yaml.ScalarNode,
-						Tag:     "!!str",
-						Value:   key,
-						Content: []*yaml.Node{n},
-					},
-					n.Content[0],
-					{
-						Kind:    yaml.ScalarNode,
-						Tag:     "!!str",
-						Value:   val,
-						Content: []*yaml.Node{n},
-					},
-					n.Content[1],
-				},
-			}
-		}
-	}
-	return n
+// IsScalarMap tests if n is a map that contains only scalar keys and values
+func IsScalarMap(n *yaml.Node) bool {
+	return n.Kind == yaml.MappingNode && n.Content[1].Kind == yaml.ScalarNode && n.Content[0].Kind == yaml.ScalarNode
 }
 
-func KeyMapToNamedMap(n *yaml.Node, key string) *yaml.Node {
+// MapSplitKeyVal splits a maps key and val into their own maps using the specified keys
+//   key: val
+//   ===========
+//   keyKey: key
+//   valKey: val
+func MapSplitKeyVal(n *yaml.Node, keyKey, valKey string) *yaml.Node {
 	if n.Kind == yaml.MappingNode {
-		if n.Content[0].Kind == yaml.ScalarNode && n.Content[1].Kind == yaml.MappingNode {
-			n.Content[1].Content = append(n.Content[1].Content,
-				&yaml.Node{
+		return &yaml.Node{
+			Kind: yaml.MappingNode,
+			Tag:  "!!map",
+			Content: []*yaml.Node{
+				{
 					Kind:    yaml.ScalarNode,
 					Tag:     "!!str",
-					Value:   key,
+					Value:   keyKey,
 					Content: []*yaml.Node{n},
 				},
-				n.Content[0])
-			return n.Content[1]
+				n.Content[0],
+				{
+					Kind:    yaml.ScalarNode,
+					Tag:     "!!str",
+					Value:   valKey,
+					Content: []*yaml.Node{n},
+				},
+				n.Content[1],
+			},
 		}
 	}
 	return n
 }
 
-func MapSlice(n *yaml.Node) *yaml.Node {
+// MapKeyIntoValueMap if the value is a map moves the key into the map with the specified name
+//   key1:
+//     key2: val2
+//   ============
+//   key2: val2
+//   keyKey: key1
+func MapKeyIntoValueMap(n *yaml.Node, keyKey string) *yaml.Node {
+	if n.Kind == yaml.MappingNode && n.Content[1].Kind == yaml.MappingNode {
+		n.Content[1].Content = append(n.Content[1].Content,
+			&yaml.Node{
+				Kind:    yaml.ScalarNode,
+				Tag:     "!!str",
+				Value:   keyKey,
+				Content: []*yaml.Node{n},
+			},
+			n.Content[0])
+		return n.Content[1]
+	}
+	return n
+}
+
+// MapToSliceMap converts a map to a slice of maps with one key each
+//   key1:
+//     key2: val1
+//   key3: val2
+//   ==============
+//   - key1:
+//       key2: val1
+//   - key3: val2
+func MapToSliceMap(n *yaml.Node) *yaml.Node {
 	if n.Kind == yaml.MappingNode {
 		nodes := make([]*yaml.Node, 0, len(n.Content)/2)
 		for i := 0; i < len(n.Content); i += 2 {
@@ -78,6 +98,9 @@ func MapSlice(n *yaml.Node) *yaml.Node {
 }
 
 // EnsureList will ensure that the base node is a SequenceNode
+//   key: val
+//   =========
+//   - key: val
 func EnsureList(n *yaml.Node) *yaml.Node {
 	if n.Kind != yaml.SequenceNode {
 		return &yaml.Node{
@@ -89,8 +112,11 @@ func EnsureList(n *yaml.Node) *yaml.Node {
 	return n
 }
 
-// EnsureMap will ensure that the base node is a MappingNode
-func EnsureMap(n *yaml.Node) *yaml.Node {
+// ScalarToMap will convert a scalar node to a mapping of {scalar: nil}
+//   string
+//   ========
+//   string: null
+func ScalarToMap(n *yaml.Node) *yaml.Node {
 	if n.Kind != yaml.MappingNode {
 		return &yaml.Node{
 			Kind: yaml.MappingNode,
@@ -104,24 +130,61 @@ func EnsureMap(n *yaml.Node) *yaml.Node {
 	return n
 }
 
-// EnsureMapMap will ensure that the key and value a MappingNode
+// EnsureMapMap will ensure that node and value are maps
+//   key: null
+//   > key: {}
+//   string
+//   > string: {}
 func EnsureMapMap(n *yaml.Node) *yaml.Node {
 	if n.Kind != yaml.MappingNode {
 		return &yaml.Node{
 			Kind: yaml.MappingNode,
 			Tag:  "!!map",
 			Content: []*yaml.Node{n, {
-				Kind:    yaml.MappingNode,
-				Tag:     "!!map",
-				Content: []*yaml.Node{},
+				Kind: yaml.MappingNode,
+				Tag:  "!!map",
 			}},
 		}
+	} else {
+		if n.Content[1].Kind == yaml.ScalarNode && n.Content[1].Tag == "!!null" {
+			n.Content[1] = &yaml.Node{
+				Kind: yaml.MappingNode,
+				Tag:  "!!map",
+			}
+		}
 	}
-	if n.Kind == yaml.MappingNode && n.Content[1].Kind != yaml.MappingNode {
-		n.Content[1] = &yaml.Node{
-			Kind:    yaml.MappingNode,
-			Tag:     "!!map",
-			Content: []*yaml.Node{},
+	return n
+}
+
+// ScalarToList wraps a scalar node in a sequence node
+//   string
+//   ========
+//   - string
+func ScalarToList(n *yaml.Node) *yaml.Node {
+	if n.Kind == yaml.ScalarNode {
+		return &yaml.Node{
+			Kind:    yaml.SequenceNode,
+			Tag:     "!!seq",
+			Content: []*yaml.Node{n},
+		}
+	}
+	return n
+}
+
+// ScalarToMapVal converts a scalar node to a mapping of {key: node}
+// does nothing if n is not a scalar node.
+//   string
+//   > key: string
+func ScalarToMapVal(n *yaml.Node, key string) *yaml.Node {
+	if n.Kind == yaml.ScalarNode {
+		return &yaml.Node{
+			Kind: yaml.MappingNode,
+			Tag:  "!!map",
+			Content: []*yaml.Node{{
+				Kind:  yaml.ScalarNode,
+				Tag:   "!!str",
+				Value: key,
+			}, n},
 		}
 	}
 	return n

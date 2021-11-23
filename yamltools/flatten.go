@@ -23,6 +23,9 @@ func getFlatLength(n *yaml.Node) int {
 	count := 0
 	isNested := false
 	for _, v := range n.Content {
+		if v.Kind == yaml.AliasNode {
+			v = v.Alias
+		}
 		if v.Kind == yaml.SequenceNode {
 			isNested = true
 			count += getFlatLength(v)
@@ -39,6 +42,9 @@ func getFlatLength(n *yaml.Node) int {
 
 func flattenSlice(n *yaml.Node, dst *[]*yaml.Node) {
 	for _, v := range n.Content {
+		if v.Kind == yaml.AliasNode {
+			v = v.Alias
+		}
 		if v.Kind == yaml.SequenceNode {
 			flattenSlice(v, dst)
 		} else {

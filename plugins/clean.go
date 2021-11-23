@@ -22,7 +22,7 @@ type CleanConfig struct {
 }
 
 func (b *CleanBase) UnmarshalYAML(n *yaml.Node) error {
-	n = yamltools.MapSlice(n)
+	n = yamltools.MapToSliceMap(n)
 	n = yamltools.EnsureList(n)
 	type CleanBaseT CleanBase
 	return n.Decode((*CleanBaseT)(b))
@@ -30,7 +30,7 @@ func (b *CleanBase) UnmarshalYAML(n *yaml.Node) error {
 
 func (c *CleanConfig) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.EnsureMapMap(n)
-	n = yamltools.KeyMapToNamedMap(n, "path")
+	n = yamltools.MapKeyIntoValueMap(n, "path")
 	type CleanConfigT CleanConfig
 	return n.Decode((*CleanConfigT)(c))
 }

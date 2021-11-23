@@ -17,8 +17,10 @@ import (
 type LinkBase []LinkConfig
 
 func (b *LinkBase) UnmarshalYAML(n *yaml.Node) error {
+	n = yamltools.EnsureFlatList(n)
+	n = yamltools.MapToSliceMap(n)
 	type LinkBaseT LinkBase
-	return yamltools.MapSlice(yamltools.EnsureFlatList(n)).Decode((*LinkBaseT)(b))
+	return n.Decode((*LinkBaseT)(b))
 }
 
 type LinkConfig struct {
@@ -30,8 +32,11 @@ type LinkConfig struct {
 
 func (c *LinkConfig) UnmarshalYAML(n *yaml.Node) error {
 	defaults.MustSet(c)
-	n = yamltools.KeyValToNamedMap(n, "path", "source")
-	n = yamltools.KeyMapToNamedMap(n, "path")
+	if yamltools.IsScalarMap(n) {
+		n = yamltools.MapSplitKeyVal(n, "path", "source")
+	} else {
+		n = yamltools.MapKeyIntoValueMap(n, "path")
+	}
 	type LinkConfigT LinkConfig
 	return n.Decode((*LinkConfigT)(c))
 }
