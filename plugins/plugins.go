@@ -12,6 +12,7 @@ type Config struct {
 	Config         PluginList
 	Profiles       ProfilesBase
 	DefaultProfile DefaultProfileBase `yaml:"default_profile"`
+	StripPath      StripPathBase      `yaml:"strip_path"`
 }
 
 func (c *Config) UnmarshalYAML(n *yaml.Node) error {
@@ -84,6 +85,7 @@ func FromBytes(data []byte) (Config, error) {
 }
 
 func (c Config) RunAll() {
+	c.StripPath.Run()
 	// groups set via the cli take precedence
 	if store.Groups == nil {
 		profile := c.DefaultProfile.GetDefaultProfile()

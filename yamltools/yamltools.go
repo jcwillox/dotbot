@@ -208,3 +208,10 @@ func ListToMapVal(n *yaml.Node, key string) *yaml.Node {
 	}
 	return n
 }
+
+func ParseBoolNode(n *yaml.Node) (value bool, ok bool) {
+	if n.Kind == yaml.ScalarNode && n.Tag == "!!bool" {
+		return n.Value == "true", true
+	}
+	return false, false
+}
