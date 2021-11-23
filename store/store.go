@@ -14,6 +14,7 @@ var location string
 var BaseDirectory string
 var HomeDirectory string
 var DryRun = false
+var Groups []string
 
 const storePerm os.FileMode = 0600
 

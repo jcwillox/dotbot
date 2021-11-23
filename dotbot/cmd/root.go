@@ -44,6 +44,7 @@ func Execute() error {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	rootCmd.Flags().StringSliceVarP(&store.Groups, "group", "g", nil, "run a specific group of directives")
 	rootCmd.PersistentFlags().StringVar(&color, "color", "auto", "when to use colors (always, auto, never)")
 	rootCmd.PersistentFlags().BoolP("help", "h", false, "help for dotbot")
 	rootCmd.PersistentFlags().BoolVar(&dryRun, "dry-run", false, "enable dry run mode")
