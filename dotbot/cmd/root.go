@@ -26,7 +26,11 @@ var rootCmd = &cobra.Command{
 				log.Fatalln("Unable to access dotfiles directory", err)
 			}
 		}
-		config, err := plugins.ReadConfig("config.yaml")
+		path := "dotbot.yaml"
+		if v, present := os.LookupEnv("DOTBOT_CONFIG"); present {
+			path = v
+		}
+		config, err := plugins.ReadConfig(path)
 		if err != nil {
 			log.Panicln("Failed reading config file", err)
 		}

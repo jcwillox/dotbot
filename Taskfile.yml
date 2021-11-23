@@ -5,6 +5,7 @@ tasks:
   default:
     env:
       DRY_RUN: true
+      DOTBOT_CONFIG: samples/config.yaml
     cmds:
       - go run ./dotbot {{.CLI_ARGS}}
     silent: true
