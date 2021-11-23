@@ -14,7 +14,6 @@ import (
 )
 
 type CleanBase []CleanConfig
-
 type CleanConfig struct {
 	Path      string
 	Force     bool
@@ -49,7 +48,7 @@ func (b CleanBase) RunAll() error {
 	return nil
 }
 
-var cleanLogger = log.GetLogger(emerald.Red, "CLEAN", emerald.LightBlack)
+var cleanLogger = log.GetLogger(emerald.ColorCode("red+b"), "CLEAN", emerald.LightBlack)
 
 func (c CleanConfig) Run() error {
 	path := utils.ExpandUser(c.Path)

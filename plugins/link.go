@@ -57,10 +57,12 @@ func (b LinkBase) RunAll() error {
 		err := config.Run()
 		if utils.IsPermError(err) && utils.WouldSudo() {
 			absSource, _ := filepath.Abs(config.Source)
-			linkLogger.Log().Tag("linking").Sudo(true).Path(
-				emerald.HighlightPath(config.Path, os.ModeSymlink),
-				emerald.HighlightPathStat(absSource),
-			)
+			if !utils.HasUsedSudo {
+				linkLogger.Log().Tag("linking").Sudo(true).Path(
+					emerald.HighlightPath(config.Path, os.ModeSymlink),
+					emerald.HighlightPathStat(absSource),
+				)
+			}
 			return utils.SudoConfig("link", &config)
 		} else if err != nil {
 			fmt.Println("error:", err)

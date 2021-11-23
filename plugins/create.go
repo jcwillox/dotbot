@@ -63,10 +63,12 @@ func (b CreateBase) RunAll() error {
 	for _, config := range b {
 		err := config.Run()
 		if utils.IsPermError(err) && utils.WouldSudo() {
-			// let user know why we want to sudo
-			createLogger.Log().TagC(emerald.Yellow, "creating").Sudo(true).Print(
-				emerald.HighlightFileMode(config.Mode), " ", emerald.HighlightPath(config.Path, os.ModeDir), "\n",
-			)
+			if !utils.HasUsedSudo {
+				// let user know why we want to sudo
+				createLogger.Log().TagC(emerald.Yellow, "creating").Sudo(true).Print(
+					emerald.HighlightFileMode(config.Mode), " ", emerald.HighlightPath(config.Path, os.ModeDir), "\n",
+				)
+			}
 			return utils.SudoConfig("create", &config)
 		}
 		if err != nil {

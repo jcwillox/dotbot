@@ -13,7 +13,10 @@ func IsRoot() bool {
 	return os.Getegid() == 0
 }
 
-var canSudo = -1
+var (
+	HasUsedSudo = false
+	canSudo     = -1
+)
 
 func CanSudo() bool {
 	if canSudo > 0 {
@@ -80,7 +83,11 @@ func SudoConfigs(configs interface{}) error {
 	}
 
 	stdin.Close()
-	return cmd.Wait()
+	if err := cmd.Wait(); err != nil {
+		HasUsedSudo = true
+		return err
+	}
+	return nil
 }
 
 func SudoConfig(directive string, config interface{}) error {
