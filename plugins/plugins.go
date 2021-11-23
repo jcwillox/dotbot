@@ -12,6 +12,14 @@ type Config struct {
 }
 
 func (c *Config) UnmarshalYAML(n *yaml.Node) error {
+	err := yamltools.LoadIncludeTag(n)
+	if err != nil {
+		return err
+	}
+	err = yamltools.LoadIncludeDirNamedTag(n)
+	if err != nil {
+		return err
+	}
 	n = yamltools.ListToMapVal(n, "config")
 	type ConfigT Config
 	return n.Decode((*ConfigT)(c))
