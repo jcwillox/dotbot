@@ -7,6 +7,16 @@ import (
 	"os"
 )
 
+type Config struct {
+	Config PluginList
+}
+
+func (c *Config) UnmarshalYAML(n *yaml.Node) error {
+	n = yamltools.ListToMapVal(n, "config")
+	type ConfigT Config
+	return n.Decode((*ConfigT)(c))
+}
+
 type PluginList []Plugin
 
 type Plugin interface {
@@ -45,21 +55,25 @@ func (c *PluginList) UnmarshalYAML(n *yaml.Node) error {
 	return nil
 }
 
-func ReadConfig(path string) (PluginList, error) {
+func ReadConfig(path string) (Config, error) {
 	data, err := os.ReadFile(path)
 	if err != nil {
-		return nil, err
+		return Config{}, err
 	}
 	return FromBytes(data)
 }
 
-func FromBytes(data []byte) (PluginList, error) {
-	config := make(PluginList, 0, 5)
+func FromBytes(data []byte) (Config, error) {
+	config := Config{}
 	err := yaml.Unmarshal(data, &config)
 	if err != nil {
-		return nil, err
+		return Config{}, err
 	}
 	return config, err
+}
+
+func (c Config) RunAll() {
+	c.Config.RunAll()
 }
 
 func (c PluginList) RunAll() {

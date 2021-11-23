@@ -189,3 +189,22 @@ func ScalarToMapVal(n *yaml.Node, key string) *yaml.Node {
 	}
 	return n
 }
+
+//ListToMapVal converts a sequence node to a mapping of {key: node}
+// does nothing if n is not a sequence node.
+//   [i1, i2]
+//   key: [i1, i2]
+func ListToMapVal(n *yaml.Node, key string) *yaml.Node {
+	if n.Kind == yaml.SequenceNode {
+		return &yaml.Node{
+			Kind: yaml.MappingNode,
+			Tag:  "!!map",
+			Content: []*yaml.Node{{
+				Kind:  yaml.ScalarNode,
+				Tag:   "!!str",
+				Value: key,
+			}, n},
+		}
+	}
+	return n
+}

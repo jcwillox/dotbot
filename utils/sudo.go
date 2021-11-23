@@ -84,7 +84,7 @@ func SudoConfigs(configs interface{}) error {
 }
 
 func SudoConfig(directive string, config interface{}) error {
-	return SudoConfigs(map[string]interface{}{directive: config})
+	return SudoConfigs([]map[string]interface{}{{directive: config}})
 }
 
 func IsPermError(err error) bool {
