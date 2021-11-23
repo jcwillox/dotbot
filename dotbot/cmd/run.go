@@ -1,8 +1,12 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/jcwillox/dotbot/plugins"
 	"github.com/jcwillox/dotbot/store"
+	"github.com/jcwillox/dotbot/template"
+	"github.com/jcwillox/emerald"
+	"github.com/k0kubun/pp/v3"
 	"github.com/spf13/cobra"
 	"io"
 	"log"
@@ -14,25 +18,42 @@ var (
 )
 
 var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "execute individual dotbot configs/directives",
+	Use:       "run [<directive>] [<key=value...>]",
+	Short:     "execute individual dotbot configs/directives",
+	ValidArgs: []string{"template"},
 	Run: func(cmd *cobra.Command, args []string) {
-		if store.BaseDirectory != "" {
-			err := os.Chdir(store.BaseDirectory)
-			if err != nil {
-				log.Fatalln("Unable to access dotfiles directory", err)
+		if len(args) > 0 {
+			// special case to allow easily testing templates
+			if args[0] == "template" {
+				if len(args) < 2 {
+					fmt.Println("No template provided!")
+					os.Exit(1)
+				}
+				result := template.RenderTemplate(args[1])
+				if !emerald.ColorEnabled {
+					fmt.Println(result)
+				} else {
+					pp.Println(result)
+				}
 			}
-		}
-		if fromStdin {
-			data, err := io.ReadAll(os.Stdin)
-			if err != nil {
-				log.Panicln("Failed reading from std-input", err)
+		} else {
+			if store.BaseDirectory != "" {
+				err := os.Chdir(store.BaseDirectory)
+				if err != nil {
+					log.Fatalln("Unable to access dotfiles directory", err)
+				}
 			}
-			config, err := plugins.FromBytes(data)
-			if err != nil {
-				log.Fatalln("Failed parsing config from std-input", err)
+			if fromStdin {
+				data, err := io.ReadAll(os.Stdin)
+				if err != nil {
+					log.Panicln("Failed reading from std-input", err)
+				}
+				config, err := plugins.FromBytes(data)
+				if err != nil {
+					log.Fatalln("Failed parsing config from std-input", err)
+				}
+				config.RunAll()
 			}
-			config.RunAll()
 		}
 	},
 }
