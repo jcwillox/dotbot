@@ -84,9 +84,9 @@ func SudoConfigs(configs interface{}) error {
 
 	stdin.Close()
 	if err := cmd.Wait(); err != nil {
-		HasUsedSudo = true
 		return err
 	}
+	HasUsedSudo = true
 	return nil
 }
 
