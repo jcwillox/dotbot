@@ -32,6 +32,14 @@ func (c *Command) UnmarshalYAML(n *yaml.Node) error {
 	return n.Decode((*CommandT)(c))
 }
 
+func (c Command) Run() error {
+	cmd, err := c.Cmd()
+	if err != nil {
+		return err
+	}
+	return cmd.Run()
+}
+
 func (c Command) Cmd() (*execabs.Cmd, error) {
 	var cmd *execabs.Cmd
 

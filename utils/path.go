@@ -1,10 +1,16 @@
 package utils
 
 import (
+	"golang.org/x/sys/execabs"
 	"log"
 	"os"
 	"strings"
 )
+
+func PathHasExecutable(file string) bool {
+	path, _ := execabs.LookPath(file)
+	return path != ""
+}
 
 // StripPath removes all specified paths from the PATH environment variable on WSL
 // this provides a significant performance improvement as it normally includes many
