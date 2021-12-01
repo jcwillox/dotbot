@@ -5,15 +5,17 @@ tasks:
   default:
     env:
       DRY_RUN: true
-      DOTBOT_CONFIG: samples/config.yaml
+      DOTBOT_CONFIG: samples/dotbot.yaml
     cmds:
       - go run ./dotbot {{.CLI_ARGS}}
     silent: true
 
   run-wsl:
-    desc: "Run inside WSL"
+    desc: Run inside WSL
+    vars:
+      CONFIG: samples/dotbot.yaml
     cmds:
-      - wsl -e go run ./dotbot {{.CLI_ARGS}}
+      - wsl -- DRY_RUN=true DOTBOT_CONFIG={{.CONFIG}} go run ./dotbot {{.CLI_ARGS}}
     preconditions:
       - sh: command -v wsl
         msg: "WSL is not installed"
