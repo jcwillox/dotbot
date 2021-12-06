@@ -2,7 +2,6 @@ package utils
 
 import (
 	"github.com/jcwillox/dotbot/store"
-	"os"
 	"path/filepath"
 	"strings"
 )
@@ -26,9 +25,4 @@ func ShrinkUser(path string) string {
 		return path
 	}
 	return filepath.Join("~", path[length:])
-}
-
-func IsWSL() bool {
-	_, isWSL := os.LookupEnv("WSL_DISTRO_NAME")
-	return isWSL
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/utils"
+	"github.com/jcwillox/dotbot/utils/sudo"
 	"github.com/jcwillox/dotbot/yamltools"
 	"github.com/jcwillox/emerald"
 	"gopkg.in/yaml.v3"
@@ -55,15 +56,15 @@ func (b LinkBase) Enabled() bool {
 func (b LinkBase) RunAll() error {
 	for _, config := range b {
 		err := config.Run()
-		if utils.IsPermError(err) && utils.WouldSudo() {
+		if sudo.IsPermission(err) && sudo.WouldSudo() {
 			absSource, _ := filepath.Abs(config.Source)
-			if !utils.HasUsedSudo {
+			if !sudo.HasUsedSudo {
 				linkLogger.Log().Tag("linking").Sudo(true).Path(
 					emerald.HighlightPath(config.Path, os.ModeSymlink),
 					emerald.HighlightPathStat(absSource),
 				)
 			}
-			return utils.SudoConfig("link", &config)
+			return sudo.Config("link", &config)
 		}
 		if err != nil {
 			fmt.Println("error:", err)

@@ -7,6 +7,7 @@ import (
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/utils"
+	"github.com/jcwillox/dotbot/utils/sudo"
 	"github.com/jcwillox/dotbot/yamltools"
 	"github.com/jcwillox/emerald"
 	"gopkg.in/yaml.v3"
@@ -58,14 +59,14 @@ func (b CreateBase) RunAll() error {
 	hasError := false
 	for _, config := range b {
 		err := config.Run()
-		if utils.IsPermError(err) && utils.WouldSudo() {
-			if !utils.HasUsedSudo {
+		if sudo.IsPermission(err) && sudo.WouldSudo() {
+			if !sudo.HasUsedSudo {
 				// let user know why we want to sudo
 				createLogger.Log().TagC(emerald.Yellow, "creating").Sudo(true).Print(
 					emerald.HighlightFileMode(os.FileMode(config.Mode)), " ", emerald.HighlightPath(config.Path, os.ModeDir), "\n",
 				)
 			}
-			return utils.SudoConfig("create", &config)
+			return sudo.Config("create", &config)
 		}
 		if err != nil {
 			log.Error("Failed to create directory:", nonExistentPath(config.Path))

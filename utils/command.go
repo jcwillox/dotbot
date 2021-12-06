@@ -4,6 +4,7 @@ import (
 	"errors"
 	"github.com/creasty/defaults"
 	"github.com/google/shlex"
+	"github.com/jcwillox/dotbot/utils/sudo"
 	"golang.org/x/sys/execabs"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -43,14 +44,14 @@ func (c Command) Run() error {
 func (c Command) Cmd() (*execabs.Cmd, error) {
 	var cmd *execabs.Cmd
 
-	sudo, err := c.needsSudo()
+	needsSudo, err := c.needsSudo()
 	if err != nil {
 		return nil, err
 	}
 
 	if c.Shell {
 		shell, args := GetShellCommand(c.Command)
-		if sudo {
+		if needsSudo {
 			cmd = execabs.Command("sudo", append([]string{"-E", shell}, args...)...)
 		} else {
 			cmd = execabs.Command(shell, args...)
@@ -60,7 +61,7 @@ func (c Command) Cmd() (*execabs.Cmd, error) {
 		if err != nil {
 			return nil, err
 		}
-		if sudo {
+		if needsSudo {
 			cmd = execabs.Command("sudo", append([]string{"-E"}, args...)...)
 		} else {
 			cmd = execabs.Command(args[0], args[1:]...)
@@ -81,8 +82,8 @@ func (c Command) Cmd() (*execabs.Cmd, error) {
 }
 
 func (c Command) needsSudo() (bool, error) {
-	if !IsRoot() && (c.Sudo || c.TrySudo) {
-		if CanSudo() {
+	if !sudo.IsRoot() && (c.Sudo || c.TrySudo) {
+		if sudo.CanSudo() {
 			c.Stdin = true
 			return true, nil
 		} else if !c.TrySudo {

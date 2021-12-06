@@ -3,6 +3,7 @@ package plugins
 import (
 	"fmt"
 	"github.com/jcwillox/dotbot/store"
+	"github.com/jcwillox/dotbot/template"
 	"github.com/jcwillox/dotbot/yamltools"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -13,6 +14,7 @@ type Config struct {
 	Profiles       ProfilesBase
 	DefaultProfile DefaultProfileBase `yaml:"default_profile"`
 	StripPath      StripPathBase      `yaml:"strip_path"`
+	Vars           map[string]interface{}
 }
 
 func (c *Config) UnmarshalYAML(n *yaml.Node) error {
@@ -86,6 +88,7 @@ func FromBytes(data []byte) (Config, error) {
 }
 
 func (c Config) RunAll() {
+	template.Vars(c.Vars)
 	c.StripPath.Run()
 	// groups set via the cli take precedence
 	if store.Groups == nil {

@@ -1,7 +1,9 @@
-package utils
+package sudo
 
 import (
 	"bytes"
+	"fmt"
+	"github.com/jcwillox/dotbot/template"
 	"golang.org/x/sys/execabs"
 	"gopkg.in/yaml.v3"
 	"log"
@@ -42,11 +44,16 @@ func WouldSudo() bool {
 	return !IsRoot() && CanSudo()
 }
 
-func SudoConfigs(configs interface{}) error {
+func Configs(configs interface{}) error {
 	if !WouldSudo() {
 		// we shouldn't be able to reach this, but we also want to
 		// ensure we don't recursively sudo
 		return os.ErrPermission
+	}
+
+	vars := template.GetVars()
+	if len(vars) > 0 {
+		configs = map[string]interface{}{"config": configs, "vars": vars}
 	}
 
 	path, err := os.Executable()
@@ -90,12 +97,12 @@ func SudoConfigs(configs interface{}) error {
 	return nil
 }
 
-func SudoConfig(directive string, config interface{}) error {
-	return SudoConfigs([]map[string]interface{}{{directive: config}})
+func Config(directive string, config interface{}) error {
+	return Configs([]map[string]interface{}{{directive: config}})
 }
 
-func IsPermError(err error) bool {
-	if err == os.ErrPermission {
+func IsPermission(err error) bool {
+	if os.IsPermission(err) {
 		return true
 	}
 	if err, ok := err.(*os.PathError); ok && err.Err == syscall.EACCES {

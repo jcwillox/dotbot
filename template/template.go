@@ -2,7 +2,6 @@ package template
 
 import (
 	"bytes"
-	"github.com/jcwillox/dotbot/utils"
 	"os"
 	"runtime"
 	"strings"
@@ -15,7 +14,7 @@ var funcs = map[string]interface{}{
 	"MatchDistro": MatchDistro,
 	"OS":          func() string { return runtime.GOOS },
 	"ARCH":        func() string { return runtime.GOARCH },
-	"IsWSL":       utils.IsWSL,
+	"IsWSL":       IsWSL,
 }
 
 var tmplVars = make(map[string]interface{})
@@ -29,6 +28,10 @@ func Vars(vars map[string]interface{}) {
 func GetVar(key string) (value interface{}, present bool) {
 	value, present = tmplVars[key]
 	return value, present
+}
+
+func GetVars() map[string]interface{} {
+	return tmplVars
 }
 
 func VarsClosure(vars map[string]interface{}) func() {

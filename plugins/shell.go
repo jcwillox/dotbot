@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/utils"
+	"github.com/jcwillox/dotbot/utils/sudo"
 	"github.com/jcwillox/dotbot/yamltools"
 	"github.com/jcwillox/emerald"
 	"gopkg.in/yaml.v3"
@@ -45,7 +46,7 @@ var shellLogger = log.GetLogger(emerald.ColorCode("magenta+b"), "SHELL", emerald
 
 func (c ShellConfig) Run() error {
 	logSudo := func() {
-		shellLogger.Sudo((c.Command.Sudo || c.Command.TrySudo) && utils.WouldSudo())
+		shellLogger.Sudo((c.Command.Sudo || c.Command.TrySudo) && sudo.WouldSudo())
 	}
 	if c.Desc == "" {
 		shellLogger.Log().Print(emerald.Blue, c.Command.ShortString(), " ")
