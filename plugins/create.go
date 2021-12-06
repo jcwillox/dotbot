@@ -3,6 +3,7 @@ package plugins
 import (
 	"errors"
 	"fmt"
+	"github.com/creasty/defaults"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/utils"
@@ -22,11 +23,12 @@ func (b *CreateBase) UnmarshalYAML(n *yaml.Node) error {
 }
 
 type CreateConfig struct {
-	Path string `yaml:",omitempty"`
-	Mode os.FileMode
+	Path string             `yaml:",omitempty"`
+	Mode utils.WeakFileMode `default:"511"`
 }
 
 func (c *CreateConfig) UnmarshalYAML(n *yaml.Node) error {
+	defaults.MustSet(c)
 	n = yamltools.ScalarToMap(n)
 	if yamltools.IsScalarMap(n) {
 		n = yamltools.MapSplitKeyVal(n, "path", "mode")
@@ -35,14 +37,8 @@ func (c *CreateConfig) UnmarshalYAML(n *yaml.Node) error {
 	}
 	type CreateConfigT CreateConfig
 	err := n.Decode((*CreateConfigT)(c))
-	if err != nil {
-		return err
-	}
-	if c.Mode == 0 {
-		c.Mode = 0755
-	}
-	c.Mode |= os.ModeDir
-	return nil
+	c.Mode |= utils.WeakFileMode(os.ModeDir)
+	return err
 }
 
 func (c *CreateConfig) MarshalYAML() (interface{}, error) {
@@ -66,7 +62,7 @@ func (b CreateBase) RunAll() error {
 			if !utils.HasUsedSudo {
 				// let user know why we want to sudo
 				createLogger.Log().TagC(emerald.Yellow, "creating").Sudo(true).Print(
-					emerald.HighlightFileMode(config.Mode), " ", emerald.HighlightPath(config.Path, os.ModeDir), "\n",
+					emerald.HighlightFileMode(os.FileMode(config.Mode)), " ", emerald.HighlightPath(config.Path, os.ModeDir), "\n",
 				)
 			}
 			return utils.SudoConfig("create", &config)
@@ -90,13 +86,13 @@ func (c CreateConfig) Run() error {
 	_, err := os.Stat(path)
 	if os.IsNotExist(err) {
 		if !store.DryRun {
-			err := os.MkdirAll(path, c.Mode)
+			err := os.MkdirAll(path, os.FileMode(c.Mode))
 			if err != nil {
 				return err
 			}
 		}
 		createLogger.Log().TagC(emerald.Yellow, "created").Sudo().Print(
-			emerald.HighlightFileMode(c.Mode), " ", emerald.HighlightPath(c.Path, os.ModeDir),
+			emerald.HighlightFileMode(os.FileMode(c.Mode)), " ", emerald.HighlightPath(c.Path, os.ModeDir),
 		).Println()
 	} else if err != nil {
 		return err

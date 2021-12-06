@@ -64,7 +64,8 @@ func (b LinkBase) RunAll() error {
 				)
 			}
 			return utils.SudoConfig("link", &config)
-		} else if err != nil {
+		}
+		if err != nil {
 			fmt.Println("error:", err)
 		}
 	}
@@ -125,7 +126,7 @@ func (c LinkConfig) Run() error {
 
 	// at this point the target does not exist
 	if c.Mkdirs {
-		err := os.MkdirAll(filepath.Dir(path), 0755)
+		err := os.MkdirAll(filepath.Dir(path), os.ModePerm)
 		if err != nil {
 			return err
 		}

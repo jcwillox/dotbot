@@ -42,7 +42,7 @@ func SetSave(key, value string) error {
 func Load() {
 	_, err := os.Stat(location)
 	if os.IsNotExist(err) {
-		err := os.MkdirAll(filepath.Dir(location), 755)
+		err := os.MkdirAll(filepath.Dir(location), os.ModePerm)
 		if err != nil {
 			log.Fatalln("Failed to create folder for state file", err)
 		}
