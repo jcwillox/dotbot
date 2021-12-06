@@ -29,10 +29,17 @@ var runCmd = &cobra.Command{
 					fmt.Println("No template provided!")
 					os.Exit(1)
 				}
-				result := template.RenderTemplate(args[1])
+				result, err := template.Parse(args[1]).Render()
 				if !emerald.ColorEnabled {
+					if err != nil {
+						log.Fatalln(err)
+					}
 					fmt.Println(result)
 				} else {
+					if err != nil {
+						pp.Println(err)
+						os.Exit(1)
+					}
 					pp.Println(result)
 				}
 			}

@@ -72,7 +72,10 @@ func (b DefaultProfileBase) GetDefaultProfile() string {
 		if config.Template == "" {
 			return config.Profile
 		}
-		result := template.RenderTemplate(config.Template)
+		result, err := template.Parse(config.Template).Render()
+		if err != nil {
+			log.Fatalln("Failed to render profile template", err)
+		}
 		if strings.EqualFold(result, "true") {
 			return config.Profile
 		}

@@ -1,6 +1,7 @@
 package log
 
 import (
+	"fmt"
 	"github.com/jcwillox/emerald"
 	"os"
 )
@@ -125,4 +126,16 @@ func Log(colorTag string, tag string, color string, a ...interface{}) {
 
 func Error(a ...interface{}) {
 	Log(colorError, "ERROR", emerald.Red, a...)
+}
+
+func Fatalln(a ...interface{}) {
+	fmt.Fprint(os.Stderr, "[FATAL] ")
+	fmt.Fprintln(os.Stderr, a...)
+	os.Exit(1)
+}
+
+func Panicln(a ...interface{}) {
+	s := fmt.Sprintln(a...)
+	fmt.Fprint(os.Stderr, "[PANIC] ", s)
+	panic(s)
 }
