@@ -42,6 +42,7 @@ func getDirective(key string) Plugin {
 	return map[string]Plugin{
 		"clean":    &CleanBase{},
 		"create":   &CreateBase{},
+		"download": &DownloadBase{},
 		"git":      &GitBase{},
 		"group":    &GroupBase{},
 		"download": &DownloadBase{},
@@ -114,4 +115,5 @@ func (c PluginList) RunAll() {
 	if errorCount > 0 {
 		fmt.Printf("ERROR: %d tasks failed out of %d\n", errorCount, len(c))
 	}
+	store.RemoveTempFiles()
 }

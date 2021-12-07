@@ -94,3 +94,19 @@ func init() {
 		DryRun = true
 	}
 }
+
+var tempFiles = make([]string, 0, 5)
+
+func TrackTempFile(path string) {
+	tempFiles = append(tempFiles, path)
+}
+
+func RemoveTempFiles() {
+	for _, path := range tempFiles {
+		err := os.Remove(path)
+		if err != nil {
+			log.Fatalln("Failed removing temporary file", err)
+		}
+	}
+	tempFiles = tempFiles[:0]
+}

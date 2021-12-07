@@ -2,7 +2,6 @@ package sudo
 
 import (
 	"bytes"
-	"fmt"
 	"github.com/jcwillox/dotbot/template"
 	"golang.org/x/sys/execabs"
 	"gopkg.in/yaml.v3"
