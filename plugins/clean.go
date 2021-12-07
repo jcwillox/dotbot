@@ -13,9 +13,9 @@ import (
 	"strings"
 )
 
-type CleanBase []CleanConfig
+type CleanBase []*CleanConfig
 type CleanConfig struct {
-	Path      string
+	Path      string `yaml:",omitempty"`
 	Force     bool
 	Recursive bool
 }
@@ -32,6 +32,13 @@ func (c *CleanConfig) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.MapKeyIntoValueMap(n, "path")
 	type CleanConfigT CleanConfig
 	return n.Decode((*CleanConfigT)(c))
+}
+
+func (c *CleanConfig) MarshalYAML() (interface{}, error) {
+	path := c.Path
+	c.Path = ""
+	type CleanConfigT CleanConfig
+	return map[string]*CleanConfigT{path: (*CleanConfigT)(c)}, nil
 }
 
 func (b CleanBase) Enabled() bool {

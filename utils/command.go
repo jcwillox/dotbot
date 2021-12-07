@@ -2,11 +2,9 @@ package utils
 
 import (
 	"errors"
-	"github.com/creasty/defaults"
 	"github.com/google/shlex"
 	"github.com/jcwillox/dotbot/utils/sudo"
 	"golang.org/x/sys/execabs"
-	"gopkg.in/yaml.v3"
 	"os"
 	"runtime"
 	"strings"
@@ -25,12 +23,6 @@ type Command struct {
 	Sudo bool
 	// Attempt to run command as root
 	TrySudo bool `yaml:"try_sudo"`
-}
-
-func (c *Command) UnmarshalYAML(n *yaml.Node) error {
-	defaults.MustSet(c)
-	type CommandT Command
-	return n.Decode((*CommandT)(c))
 }
 
 func (c Command) Run() error {

@@ -2,6 +2,7 @@ package plugins
 
 import (
 	"fmt"
+	"github.com/creasty/defaults"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/utils"
 	"github.com/jcwillox/dotbot/utils/sudo"
@@ -10,7 +11,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type ShellBase []ShellConfig
+type ShellBase []*ShellConfig
 type ShellConfig struct {
 	Desc    string
 	Command utils.Command `yaml:",inline"`
@@ -23,6 +24,7 @@ func (b *ShellBase) UnmarshalYAML(n *yaml.Node) error {
 }
 
 func (c *ShellConfig) UnmarshalYAML(n *yaml.Node) error {
+	defaults.MustSet(c)
 	n = yamltools.ScalarToMapVal(n, "command")
 	type ShellConfigT ShellConfig
 	return n.Decode((*ShellConfigT)(c))

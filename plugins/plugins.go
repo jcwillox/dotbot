@@ -31,7 +31,7 @@ func (c *Config) UnmarshalYAML(n *yaml.Node) error {
 	return n.Decode((*ConfigT)(c))
 }
 
-type PluginList []Plugin
+type PluginList []map[string]Plugin
 
 type Plugin interface {
 	Enabled() bool
@@ -65,7 +65,7 @@ func (c *PluginList) UnmarshalYAML(n *yaml.Node) error {
 			return err
 		}
 		// set index
-		(*c)[i] = plugin
+		(*c)[i] = map[string]Plugin{keys[0]: plugin}
 	}
 	return nil
 }
@@ -103,10 +103,12 @@ func (c Config) RunAll() {
 
 func (c PluginList) RunAll() {
 	errorCount := 0
-	for _, plugin := range c {
-		err := plugin.RunAll()
-		if err != nil {
-			errorCount++
+	for _, item := range c {
+		for _, plugin := range item {
+			err := plugin.RunAll()
+			if err != nil {
+				errorCount++
+			}
 		}
 	}
 	if errorCount > 0 {

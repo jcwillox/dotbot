@@ -15,7 +15,7 @@ import (
 	"path/filepath"
 )
 
-type LinkBase []LinkConfig
+type LinkBase []*LinkConfig
 
 func (b *LinkBase) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.EnsureFlatList(n)

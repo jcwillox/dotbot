@@ -16,12 +16,12 @@ import (
 	"path/filepath"
 )
 
-type GitBase []GitConfig
+type GitBase []*GitConfig
 
 type GitConfig struct {
-	Path string
+	Path string `yaml:",omitempty"`
 	Url  string
-	Name string
+	Name string `yaml:",omitempty"`
 	// one of clone, pull, clone_pull
 	Method  string `default:"clone_pull"`
 	Shallow bool   `default:"true"`
@@ -42,6 +42,13 @@ func (c *GitConfig) UnmarshalYAML(n *yaml.Node) error {
 	}
 	type GitConfigT GitConfig
 	return n.Decode((*GitConfigT)(c))
+}
+
+func (c *GitConfig) MarshalYAML() (interface{}, error) {
+	path := c.Path
+	c.Path = ""
+	type GitConfigT GitConfig
+	return map[string]*GitConfigT{path: (*GitConfigT)(c)}, nil
 }
 
 func (b GitBase) Enabled() bool {

@@ -14,7 +14,7 @@ import (
 	"os"
 )
 
-type CreateBase []CreateConfig
+type CreateBase []*CreateConfig
 
 func (b *CreateBase) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.MapToSliceMap(n)

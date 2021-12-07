@@ -13,9 +13,9 @@ import (
 )
 
 type PackageBase []PackageConfig
-type PackageConfig []Package
-type Package struct {
-	Manager  string
+type PackageConfig []*PackageItem
+type PackageItem struct {
+	Manager  string `yaml:",omitempty"`
 	Packages []string
 }
 
@@ -31,11 +31,18 @@ func (p *PackageConfig) UnmarshalYAML(n *yaml.Node) error {
 	type PackageConfigT PackageConfig
 	return n.Decode((*PackageConfigT)(p))
 }
-func (c *Package) UnmarshalYAML(n *yaml.Node) error {
+func (c *PackageItem) UnmarshalYAML(n *yaml.Node) error {
 	n.Content[1] = yamltools.EnsureList(n.Content[1])
 	n = yamltools.MapSplitKeyVal(n, "manager", "packages")
-	type PackageT Package
-	return n.Decode((*PackageT)(c))
+	type PackageItemT PackageItem
+	return n.Decode((*PackageItemT)(c))
+}
+
+func (c *PackageItem) MarshalYAML() (interface{}, error) {
+	manager := c.Manager
+	c.Manager = ""
+	type PackageItemT PackageItem
+	return map[string][]string{manager: c.Packages}, nil
 }
 
 func (b PackageBase) Enabled() bool {
@@ -66,7 +73,7 @@ func (p PackageConfig) Run() error {
 	return nil
 }
 
-func (c Package) InstallAll() error {
+func (c PackageItem) InstallAll() error {
 	switch c.Manager {
 	case "apt":
 		for _, pkg := range c.Packages {
