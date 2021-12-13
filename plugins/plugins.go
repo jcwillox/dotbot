@@ -46,7 +46,7 @@ func getDirective(key string) Plugin {
 		"extract":  &ExtractBase{},
 		"git":      &GitBase{},
 		"group":    &GroupBase{},
-		"download": &DownloadBase{},
+		"install":  &InstallBase{},
 		"link":     &LinkBase{},
 		"package":  &PackageBase{},
 		"shell":    &ShellBase{},
