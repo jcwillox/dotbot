@@ -22,11 +22,12 @@ import (
 
 type DownloadBase []*DownloadConfig
 type DownloadConfig struct {
-	Url    string
-	Path   string `yaml:",omitempty"`
-	Mkdirs bool   `default:"true"`
-	Force  bool
-	Mode   utils.WeakFileMode `default:"438"`
+	Url     string
+	Path    string `yaml:",omitempty"`
+	Mkdirs  bool   `default:"true"`
+	Force   bool
+	Mode    utils.WeakFileMode `default:"438"`
+	Extract ExtractItems
 }
 
 func (b *DownloadBase) UnmarshalYAML(n *yaml.Node) error {
@@ -176,6 +177,12 @@ func (c DownloadConfig) Run() error {
 	} else {
 		_, err = io.Copy(f, resp.Body)
 		return err
+	}
+	if c.Extract != nil {
+		return ExtractConfig{
+			Archive: f.Name(),
+			Items:   c.Extract,
+		}.Run()
 	}
 	return nil
 }

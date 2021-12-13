@@ -43,6 +43,7 @@ func getDirective(key string) Plugin {
 		"clean":    &CleanBase{},
 		"create":   &CreateBase{},
 		"download": &DownloadBase{},
+		"extract":  &ExtractBase{},
 		"git":      &GitBase{},
 		"group":    &GroupBase{},
 		"download": &DownloadBase{},
