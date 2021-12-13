@@ -46,16 +46,19 @@ func (b CleanBase) Enabled() bool {
 }
 
 func (b CleanBase) RunAll() error {
-	for _, config := range b {
+	paths := make([]string, len(b))
+	for i, config := range b {
+		paths[i] = emerald.HighlightPath(config.Path, os.ModeDir)
 		err := config.Run()
 		if err != nil {
 			fmt.Println("ERROR:", err)
 		}
 	}
+	cleanLogger.Log().Tag("cleaned").Println(strings.Join(paths, emerald.LightBlack+", "+emerald.Reset))
 	return nil
 }
 
-var cleanLogger = log.GetLogger(emerald.ColorCode("red+b"), "CLEAN", emerald.LightBlack)
+var cleanLogger = log.GetLogger(emerald.ColorCode("red+b"), "CLEAN", emerald.Yellow)
 
 func (c CleanConfig) Run() error {
 	path := utils.ExpandUser(c.Path)
