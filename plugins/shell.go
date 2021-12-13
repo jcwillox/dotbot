@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/creasty/defaults"
 	"github.com/jcwillox/dotbot/log"
+	"github.com/jcwillox/dotbot/template"
 	"github.com/jcwillox/dotbot/utils"
 	"github.com/jcwillox/dotbot/utils/sudo"
 	"github.com/jcwillox/dotbot/yamltools"
@@ -47,6 +48,10 @@ func (b ShellBase) RunAll() error {
 var shellLogger = log.GetLogger(emerald.ColorCode("magenta+b"), "SHELL", emerald.LightBlack)
 
 func (c ShellConfig) Run() error {
+	err := template.RenderField(&c.Command.Command)
+	if err != nil {
+		return err
+	}
 	logSudo := func() {
 		shellLogger.Sudo((c.Command.Sudo || c.Command.TrySudo) && sudo.WouldSudo())
 	}
@@ -57,7 +62,7 @@ func (c ShellConfig) Run() error {
 	} else {
 		shellLogger.Log().Print(emerald.Blue, c.Desc, " ")
 		logSudo()
-		shellLogger.Print(emerald.LightBlack, "[", c.Command.ShortString(), "]\n")
+		shellLogger.Print(emerald.LightBlack, "'", c.Command.ShortString(), "'\n")
 	}
 	cmd, err := c.Command.Cmd()
 	if err != nil {

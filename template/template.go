@@ -99,3 +99,25 @@ func HasTemplate(tmpl string) bool {
 	}
 	return false
 }
+
+func renderField(tmpl *string) error {
+	if !HasTemplate(*tmpl) {
+		return nil
+	}
+	result, err := Parse(*tmpl).Render()
+	if err != nil {
+		return err
+	}
+	*tmpl = result
+	return nil
+}
+
+func RenderField(tmpls ...*string) error {
+	for _, tmpl := range tmpls {
+		err := renderField(tmpl)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
