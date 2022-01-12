@@ -2,6 +2,7 @@ package utils
 
 import (
 	"github.com/jcwillox/dotbot/store"
+	"os"
 	"path/filepath"
 	"strings"
 )
@@ -25,4 +26,17 @@ func ShrinkUser(path string) string {
 		return path
 	}
 	return filepath.Join("~", path[length:])
+}
+
+func GetConfigPath() string {
+	if v, present := os.LookupEnv("DOTBOT_CONFIG"); present {
+		return v
+	}
+	for _, ext := range []string{"yaml", "yml", "json"} {
+		filename := "dotbot." + ext
+		if _, err := os.Stat(filename); err == nil {
+			return filename
+		}
+	}
+	return ""
 }

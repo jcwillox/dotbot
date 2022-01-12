@@ -3,6 +3,7 @@ package cmd
 import (
 	"github.com/jcwillox/dotbot/plugins"
 	"github.com/jcwillox/dotbot/store"
+	"github.com/jcwillox/dotbot/utils"
 	"github.com/jcwillox/emerald"
 	"github.com/spf13/cobra"
 	"log"
@@ -26,10 +27,7 @@ var rootCmd = &cobra.Command{
 				log.Fatalln("Unable to access dotfiles directory", err)
 			}
 		}
-		path := "dotbot.yaml"
-		if v, present := os.LookupEnv("DOTBOT_CONFIG"); present {
-			path = v
-		}
+		path := utils.GetConfigPath()
 		config, err := plugins.ReadConfig(path)
 		if err != nil {
 			log.Panicln("Failed reading config file", err)
