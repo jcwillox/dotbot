@@ -9,12 +9,14 @@ import (
 )
 
 var funcs = map[string]interface{}{
-	"env":         os.Getenv,
-	"Distro":      Distro,
-	"MatchDistro": MatchDistro,
-	"OS":          func() string { return runtime.GOOS },
-	"ARCH":        func() string { return runtime.GOARCH },
-	"IsWSL":       IsWSL,
+	"env":          os.Getenv,
+	"Distro":       Distro,
+	"MatchDistro":  MatchDistro,
+	"OS":           func() string { return runtime.GOOS },
+	"ARCH":         func() string { return runtime.GOARCH },
+	"IsWSL":        IsWSL,
+	"DefaultShell": DefaultShell,
+	"Which":        Which,
 }
 
 var tmplVars = make(map[string]interface{})
