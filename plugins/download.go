@@ -22,6 +22,7 @@ import (
 
 type DownloadBase []*DownloadConfig
 type DownloadConfig struct {
+	Name    string
 	Url     string
 	Path    string `yaml:",omitempty"`
 	Mkdirs  bool   `default:"true"`
@@ -154,6 +155,10 @@ func (c DownloadConfig) Run() error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	if c.Name != "" {
+		name = c.Name
+	}
 
 	// download file using progress bar when color enabled
 	if emerald.ColorEnabled {

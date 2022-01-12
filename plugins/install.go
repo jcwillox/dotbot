@@ -19,7 +19,7 @@ import (
 
 type InstallBase []InstallConfig
 type InstallConfig struct {
-	Title    string
+	Name     string
 	Url      string
 	Version  string
 	Download *DownloadConfig
@@ -83,12 +83,8 @@ func (c InstallConfig) Run() error {
 	}
 
 	current := store.Get(c.Url)
-	name := c.Title
-	if name == "" {
-		name = c.Url
-	}
 
-	logInstall(name, current, version)
+	logInstall(c.String(), current, version)
 	if current != version {
 		defer template.VarsClosure(map[string]interface{}{"Current": current, "Version": version, "Url": c.Url})()
 
@@ -116,6 +112,13 @@ func (c InstallConfig) Run() error {
 		store.SetSave(c.Url, version)
 	}
 	return nil
+}
+
+func (c InstallConfig) String() string {
+	if c.Name != "" {
+		return c.Name
+	}
+	return c.Url
 }
 
 var noFollowClient = &http.Client{
