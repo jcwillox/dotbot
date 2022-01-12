@@ -64,7 +64,7 @@ func (b LinkBase) RunAll() error {
 					emerald.HighlightPathStat(absSource),
 				)
 			}
-			return sudo.Config("link", &config)
+			err = sudo.Config("link", &config)
 		}
 		if err != nil {
 			fmt.Println("error:", err)

@@ -77,6 +77,7 @@ func (c Command) needsSudo() (bool, error) {
 	if !sudo.IsRoot() && (c.Sudo || c.TrySudo) {
 		if sudo.CanSudo() {
 			c.Stdin = true
+			sudo.HasUsedSudo = true
 			return true, nil
 		} else if !c.TrySudo {
 			return false, errors.New("unable to sudo")

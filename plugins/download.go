@@ -64,7 +64,7 @@ func (b DownloadBase) RunAll() error {
 					emerald.HighlightFileMode(os.FileMode(config.Mode)), " ", emerald.HighlightPath(config.Path, os.FileMode(config.Mode)), "\n",
 				)
 			}
-			return sudo.Config("download", &config)
+			err = sudo.Config("download", &config)
 		}
 		if err != nil {
 			fmt.Println("ERROR:", err)

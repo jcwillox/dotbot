@@ -66,7 +66,7 @@ func (b CreateBase) RunAll() error {
 					emerald.HighlightFileMode(os.FileMode(config.Mode)), " ", emerald.HighlightPath(config.Path, os.ModeDir), "\n",
 				)
 			}
-			return sudo.Config("create", &config)
+			err = sudo.Config("create", &config)
 		}
 		if err != nil {
 			log.Error("Failed to create directory:", nonExistentPath(config.Path))
