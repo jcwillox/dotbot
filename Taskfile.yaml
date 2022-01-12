@@ -35,6 +35,12 @@ tasks:
       GOOS: "{{.GOOS}}"
       GOARCH: "{{.GOARCH}}"
 
+  docker:
+    desc: Build & run docker container
+    cmds:
+      - docker build -t dotbot .
+      - docker run --rm -ti -v /etc/localtime:/etc/localtime:ro --name dotbot dotbot {{.CLI_ARGS}}
+
   clean:
     desc: Remove temporary files
     cmds:
