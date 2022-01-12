@@ -186,7 +186,7 @@ func (c DownloadConfig) Run() error {
 		_, err = io.Copy(f, resp.Body)
 		return err
 	}
-	if c.Extract != nil {
+	if c.Extract != nil && len(c.Extract) > 0 {
 		return ExtractConfig{
 			Archive: f.Name(),
 			Items:   c.Extract,
