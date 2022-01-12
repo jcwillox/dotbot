@@ -3,6 +3,7 @@ package plugins
 import (
 	"fmt"
 	"github.com/creasty/defaults"
+	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/template"
 	"github.com/jcwillox/dotbot/utils"
@@ -61,7 +62,7 @@ func (b DownloadBase) RunAll() error {
 		if sudo.IsPermission(err) && sudo.WouldSudo() {
 			if !sudo.HasUsedSudo {
 				// let user know why we want to sudo
-				createLogger.Log().TagC(emerald.Yellow, "downloading").Sudo(true).Print(
+				downloadLogger.Log().TagC(emerald.Yellow, "downloading").Sudo(true).Print(
 					emerald.HighlightFileMode(os.FileMode(config.Mode)), " ", emerald.HighlightPath(config.Path, os.FileMode(config.Mode)), "\n",
 				)
 			}
@@ -74,6 +75,8 @@ func (b DownloadBase) RunAll() error {
 	}
 	return nil
 }
+
+var downloadLogger = log.GetLogger(emerald.ColorCode("blue+b"), "DOWNLOAD", emerald.Yellow)
 
 func (c DownloadConfig) Run() error {
 	var f *os.File
