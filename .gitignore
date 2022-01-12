@@ -13,3 +13,5 @@
 
 *.iml
 .idea/
+dist/
+completions/dotbot.sh
