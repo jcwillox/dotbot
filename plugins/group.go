@@ -23,7 +23,9 @@ func (b *GroupBase) UnmarshalYAML(n *yaml.Node) error {
 func (c *GroupConfig) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.MapSplitKeyVal(n, "name", "config")
 	type GroupConfigT GroupConfig
-	return n.Decode((*GroupConfigT)(c))
+	err := n.Decode((*GroupConfigT)(c))
+	store.RegisteredGroups = append(store.RegisteredGroups, c.Name)
+	return err
 }
 
 func (b GroupBase) Enabled() bool {

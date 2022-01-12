@@ -9,9 +9,10 @@ import (
 )
 
 var (
-	DryRun        = false
-	Groups        []string
-	HomeDirectory string
+	DryRun           = false
+	Groups           []string
+	RegisteredGroups []string
+	HomeDirectory    string
 )
 
 var (

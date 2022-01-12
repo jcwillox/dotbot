@@ -44,6 +44,16 @@ func init() {
 	_ = rootCmd.RegisterFlagCompletionFunc("color", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 		return []string{"auto", "always", "never"}, cobra.ShellCompDirectiveNoFileComp
 	})
+	_ = rootCmd.RegisterFlagCompletionFunc("group", func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		if base, present := store.HasGet("directory"); present {
+			err := os.Chdir(base)
+			if err == nil {
+				path := utils.GetConfigPath()
+				_, _ = plugins.ReadConfig(path)
+			}
+		}
+		return store.RegisteredGroups, cobra.ShellCompDirectiveNoFileComp
+	})
 }
 
 func initConfig() {
