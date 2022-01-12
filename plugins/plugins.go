@@ -6,6 +6,7 @@ import (
 	"github.com/jcwillox/dotbot/template"
 	"github.com/jcwillox/dotbot/yamltools"
 	"gopkg.in/yaml.v3"
+	"log"
 	"os"
 )
 
@@ -13,6 +14,7 @@ type Config struct {
 	Config         PluginList
 	Profiles       ProfilesBase
 	DefaultProfile DefaultProfileBase `yaml:"default_profile"`
+	UpdateRepo     *bool              `yaml:"update_repo"`
 	StripPath      StripPathBase      `yaml:"strip_path"`
 	Vars           map[string]interface{}
 }
@@ -89,9 +91,29 @@ func FromBytes(data []byte) (Config, error) {
 	return config, err
 }
 
-func (c Config) RunAll() {
+// RunAll runs all configs returns true if the config should be reloaded
+func (c Config) RunAll(useBasic ...bool) bool {
 	template.Vars(c.Vars)
 	c.StripPath.Run()
+
+	if useBasic == nil {
+		if c.UpdateRepo == nil || *c.UpdateRepo == true {
+			err := GitConfig{
+				Path:    store.BaseDir(),
+				Name:    "dotfiles",
+				Method:  "pull",
+				Shallow: false,
+			}.Run()
+			if err != nil {
+				log.Fatalln("failed to clone/pull:", err)
+				return false
+			}
+			if DidGitUpdate {
+				return true
+			}
+		}
+	}
+
 	// groups set via the cli take precedence
 	if store.Groups == nil {
 		profile := c.DefaultProfile.GetDefaultProfile()
@@ -100,7 +122,9 @@ func (c Config) RunAll() {
 			LogProfile(profile)
 		}
 	}
+
 	c.Config.RunAll()
+	return false
 }
 
 func (c PluginList) RunAll() {

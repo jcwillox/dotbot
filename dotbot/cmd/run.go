@@ -54,7 +54,7 @@ var runCmd = &cobra.Command{
 				if err != nil {
 					log.Fatalln("Failed parsing config from std-input", err)
 				}
-				config.RunAll()
+				config.RunAll(true)
 			}
 		}
 	},

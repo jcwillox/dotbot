@@ -139,7 +139,10 @@ func (c GitConfig) clonePath(path string, sudo bool) error {
 	return cmd.Run()
 }
 
+var DidGitUpdate bool
+
 func (c GitConfig) pullPath(path string, sudo bool) error {
+	DidGitUpdate = true
 	if store.DryRun {
 		return nil
 	}
@@ -164,6 +167,7 @@ func (c GitConfig) pullPath(path string, sudo bool) error {
 	for {
 		out, err := reader.ReadString('\n')
 		if out == "Already up to date.\n" {
+			DidGitUpdate = false
 			if emerald.ColorEnabled {
 				emerald.Print("\x1b[F\x1b[K")
 			}

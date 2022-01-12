@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/plugins"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/utils"
 	"github.com/jcwillox/emerald"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 var (
@@ -22,12 +24,19 @@ var rootCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.EnsureInBaseDir()
 		path := utils.GetConfigPath()
-		config, err := plugins.ReadConfig(path)
-		if err != nil {
-			log.Panicln("Failed reading config file", err)
+		if loadRunConfig(path) {
+			fmt.Println("reloading configuration...")
+			loadRunConfig(path)
 		}
-		config.RunAll()
 	},
+}
+
+func loadRunConfig(path string) bool {
+	config, err := plugins.ReadConfig(path)
+	if err != nil {
+		log.Panicln("failed reading config file", err)
+	}
+	return config.RunAll()
 }
 
 func Execute() error {
