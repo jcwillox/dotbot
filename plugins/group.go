@@ -41,19 +41,21 @@ func logGroup(group string) {
 }
 
 func (b GroupBase) RunAll() error {
-	for _, c := range b {
-		if store.Groups != nil {
-			for _, group := range store.Groups {
+	if store.Groups != nil {
+		for _, group := range store.Groups {
+			for _, c := range b {
 				if c.Name == group {
 					logGroup(group)
 					c.Config.RunAll()
 				}
 			}
-		} else {
+
+		}
+	} else {
+		for _, c := range b {
 			logGroup(c.Name)
 			c.Config.RunAll()
 		}
-
 	}
 	return nil
 }
