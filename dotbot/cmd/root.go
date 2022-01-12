@@ -1,13 +1,12 @@
 package cmd
 
 import (
+	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/plugins"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/utils"
 	"github.com/jcwillox/emerald"
 	"github.com/spf13/cobra"
-	"log"
-	"os"
 )
 
 var (
@@ -21,12 +20,7 @@ var rootCmd = &cobra.Command{
 	Short:   "",
 	Version: "0.0.1",
 	Run: func(cmd *cobra.Command, args []string) {
-		if store.BaseDirectory != "" {
-			err := os.Chdir(store.BaseDirectory)
-			if err != nil {
-				log.Fatalln("Unable to access dotfiles directory", err)
-			}
-		}
+		utils.EnsureInBaseDir()
 		path := utils.GetConfigPath()
 		config, err := plugins.ReadConfig(path)
 		if err != nil {

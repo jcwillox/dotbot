@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 	"github.com/jcwillox/dotbot/plugins"
-	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/template"
+	"github.com/jcwillox/dotbot/utils"
 	"github.com/jcwillox/emerald"
 	"github.com/k0kubun/pp/v3"
 	"github.com/spf13/cobra"
@@ -44,12 +44,7 @@ var runCmd = &cobra.Command{
 				}
 			}
 		} else {
-			if store.BaseDirectory != "" {
-				err := os.Chdir(store.BaseDirectory)
-				if err != nil {
-					log.Fatalln("Unable to access dotfiles directory", err)
-				}
-			}
+			utils.EnsureInBaseDir()
 			if fromStdin {
 				data, err := io.ReadAll(os.Stdin)
 				if err != nil {

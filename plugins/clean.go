@@ -81,7 +81,7 @@ func (c CleanConfig) Run() error {
 			return err
 		}
 		// check link is to dotfiles directory
-		rel, err := filepath.Rel(store.BaseDirectory, dest)
+		rel, err := filepath.Rel(store.BaseDir(), dest)
 		if !c.Force && (err != nil || strings.HasPrefix(rel, "..")) {
 			return nil
 		}

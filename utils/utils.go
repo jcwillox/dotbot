@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"os"
 	"path/filepath"
@@ -39,4 +40,13 @@ func GetConfigPath() string {
 		}
 	}
 	return ""
+}
+
+func EnsureInBaseDir() {
+	if base, present := store.HasGet("directory"); present {
+		err := os.Chdir(base)
+		if err != nil {
+			log.Fatalln("Unable to access dotfiles directory", err)
+		}
+	}
 }

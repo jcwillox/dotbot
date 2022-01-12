@@ -8,13 +8,16 @@ import (
 	"runtime"
 )
 
-var store map[string]string
-var location string
+var (
+	DryRun        = false
+	Groups        []string
+	HomeDirectory string
+)
 
-var BaseDirectory string
-var HomeDirectory string
-var DryRun = false
-var Groups []string
+var (
+	store    map[string]string
+	location string
+)
 
 const storePerm os.FileMode = 0600
 
@@ -24,6 +27,11 @@ func Set(key, value string) {
 
 func Get(key string) string {
 	return store[key]
+}
+
+func HasGet(key string) (string, bool) {
+	val, present := store[key]
+	return val, present
 }
 
 func Save() error {
@@ -63,6 +71,10 @@ func Load() {
 	}
 }
 
+func BaseDir() string {
+	return Get("directory")
+}
+
 func getHome() string {
 	dir, err := os.UserHomeDir()
 	if err != nil {
@@ -89,7 +101,6 @@ func init() {
 	HomeDirectory = getHome()
 	location = getLocation()
 	Load()
-	BaseDirectory = Get("directory")
 	if dryRun := os.Getenv("DRY_RUN"); dryRun == "true" {
 		DryRun = true
 	}
