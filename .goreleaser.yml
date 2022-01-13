@@ -1,0 +1,83 @@
+before:
+  hooks:
+    - go mod tidy
+    - bash -c 'go run ./dotbot completion bash > ./completions/dotbot.sh'
+
+snapshot:
+  name_template: "{{ .Version }}"
+
+checksum:
+  name_template: 'checksums.txt'
+
+builds:
+  - id: nix
+    env:
+      - CGO_ENABLED=0
+      - GO386=softfloat
+    goos:
+      - linux
+      - darwin
+    goarch:
+      - "386"
+      - amd64
+      - arm
+      - arm64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X github.com/jcwillox/dotbot/store.Version={{.Version}}
+    main: ./dotbot
+
+  - id: windows
+    env:
+      - CGO_ENABLED=0
+      - GO386=softfloat
+    goos:
+      - windows
+    goarch:
+      - "386"
+      - amd64
+    flags:
+      - -trimpath
+    ldflags:
+      - -s -w -X github.com/jcwillox/dotbot/store.Version={{.Version}}
+    main: ./dotbot
+
+archives:
+  - id: windows
+    builds:
+      - windows
+    format: zip
+    files:
+      - completions/dotbot.ps1
+    replacements:
+      386: x86
+      amd64: x64
+
+  - id: nix
+    builds:
+      - nix
+    files:
+      - completions/dotbot.zsh
+      - completions/dotbot.fish
+      - completions/dotbot.sh
+    replacements:
+      386: i386
+
+nfpms:
+  - license: MIT
+    maintainer: Joshua Cowie-Willox <joshwillox@gmail.com>
+    homepage: https://github.com/jcwillox/dotbot
+    description: "A powerful bootstrapping utility for your dotfiles and system"
+    bindir: /usr/bin
+    formats:
+      - apk
+      - rpm
+      - deb
+    contents:
+      - src: completions/dotbot.zsh
+        dst: /usr/share/zsh/vendor-completions/_dotbot
+      - src: completions/dotbot.fish
+        dst: /usr/share/fish/vendor_completions.d/dotbot.fish
+      - src: completions/dotbot.sh
+        dst: /etc/bash_completion.d/dotbot
