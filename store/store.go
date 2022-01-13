@@ -13,6 +13,7 @@ var (
 	Groups           []string
 	RegisteredGroups []string
 	HomeDirectory    string
+	Version          = "devel"
 )
 
 var (

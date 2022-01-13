@@ -20,7 +20,7 @@ var (
 var rootCmd = &cobra.Command{
 	Use:     "dotbot",
 	Short:   "",
-	Version: "0.0.1",
+	Version: store.Version,
 	Run: func(cmd *cobra.Command, args []string) {
 		utils.EnsureInBaseDir()
 		path := utils.GetConfigPath()
