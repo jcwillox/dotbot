@@ -1,0 +1,588 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "plugin-list": {
+      "oneOf": [
+        {
+          "type": "array",
+          "minItems": 1,
+          "additionalProperties": false,
+          "items": {
+            "$ref": "#/$defs/plugin"
+          }
+        },
+        {
+          "$ref": "#/$defs/plugin"
+        }
+      ]
+    },
+    "plugin": {
+      "type": "object",
+      "oneOf": [
+        {
+          "$ref": "#/$defs/link"
+        },
+        {
+          "$ref": "#/$defs/create"
+        },
+        {
+          "$ref": "#/$defs/clean"
+        },
+        {
+          "$ref": "#/$defs/shell"
+        },
+        {
+          "$ref": "#/$defs/git"
+        },
+        {
+          "$ref": "#/$defs/group"
+        },
+        {
+          "$ref": "#/$defs/package"
+        },
+        {
+          "$ref": "#/$defs/install"
+        },
+        {
+          "$ref": "#/$defs/download"
+        },
+        {
+          "$ref": "#/$defs/sharkdp"
+        }
+      ]
+    },
+    "dotbot": {
+      "type": "object",
+      "required": [
+        "config"
+      ],
+      "properties": {
+        "config": {
+          "$ref": "#/$defs/plugin-list"
+        },
+        "profiles": {}
+      }
+    },
+    "link": {
+      "type": "object",
+      "required": [
+        "link"
+      ],
+      "properties": {
+        "link": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/link-config"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/link-config"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "link-config": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "object",
+          "string"
+        ],
+        "required": [
+          "source"
+        ],
+        "properties": {
+          "source": {
+            "type": "string"
+          },
+          "force": {
+            "type": "boolean",
+            "default": false
+          },
+          "mkdirs": {
+            "type": "boolean",
+            "default": true
+          },
+          "recursive": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "create": {
+      "type": "object",
+      "required": [
+        "create"
+      ],
+      "properties": {
+        "create": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/create-config"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/create-config"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "create-config": {
+      "type": [
+        "object",
+        "string"
+      ],
+      "additionalProperties": {
+        "type": [
+          "object",
+          "number",
+          "null"
+        ],
+        "required": false,
+        "properties": {
+          "mode": {
+            "type": "number"
+          }
+        }
+      }
+    },
+    "clean": {
+      "type": "object",
+      "required": [
+        "clean"
+      ],
+      "properties": {
+        "clean": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/clean-config"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/clean-config"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "clean-config": {
+      "type": [
+        "object",
+        "string"
+      ],
+      "additionalProperties": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "required": false,
+        "properties": {
+          "force": {
+            "type": "boolean",
+            "default": false
+          },
+          "recursive": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "shell": {
+      "type": "object",
+      "required": [
+        "shell"
+      ],
+      "properties": {
+        "shell": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/shell-config"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/shell-config"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "shell-config": {
+      "type": "object",
+      "properties": {
+        "desc": {
+          "type": "string"
+        },
+        "command": {
+          "type": "string"
+        },
+        "shell": {
+          "type": "boolean",
+          "default": true
+        },
+        "stdin": {
+          "type": "boolean",
+          "default": false
+        },
+        "stdout": {
+          "type": "boolean",
+          "default": true
+        },
+        "stderr": {
+          "type": "boolean",
+          "default": true
+        },
+        "sudo": {
+          "type": "boolean",
+          "default": false
+        },
+        "try_sudo": {
+          "type": "boolean",
+          "default": false
+        }
+      }
+    },
+    "git": {
+      "type": "object",
+      "required": [
+        "git"
+      ],
+      "properties": {
+        "git": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/git-config"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/git-config"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "git-config": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "url": {
+            "type": "string"
+          },
+          "desc": {
+            "type": "string"
+          },
+          "method": {
+            "type": "string",
+            "enum": [
+              "clone",
+              "pull",
+              "clone_pull"
+            ],
+            "default": "clone_pull"
+          }
+        }
+      }
+    },
+    "group": {
+      "type": "object",
+      "required": [
+        "group"
+      ],
+      "properties": {
+        "group": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/group-config"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/group-config"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "group-config": {
+      "type": [
+        "object",
+        "string"
+      ],
+      "additionalProperties": {
+        "$ref": "#/$defs/plugin-list"
+      }
+    },
+    "package": {
+      "type": "object",
+      "required": [
+        "package"
+      ],
+      "properties": {
+        "package": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/package-config"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/package-config"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "package-config": {
+      "type": [
+        "object",
+        "string"
+      ],
+      "properties": {
+        "apt": {
+          "$ref": "#/$defs/package-item"
+        },
+        "apk": {
+          "$ref": "#/$defs/package-item"
+        }
+      }
+    },
+    "package-item": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        }
+      ]
+    },
+    "install": {
+      "type": "object",
+      "required": [
+        "install"
+      ],
+      "properties": {
+        "install": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/install-config"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/install-config"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "install-config": {
+      "type": [
+        "object",
+        "string"
+      ],
+      "required": [
+        "url"
+      ],
+      "properties": {
+        "name": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        },
+        "sudo": {
+          "type": "boolean",
+          "default": false
+        },
+        "download": {
+          "type": "object",
+          "required": [
+            "url"
+          ],
+          "properties": {
+            "name": {
+              "type": "string"
+            },
+            "url": {
+              "type": "string"
+            },
+            "path": {
+              "type": "string"
+            },
+            "force": {
+              "type": "boolean",
+              "default": false
+            },
+            "mkdirs": {
+              "type": "boolean",
+              "default": true
+            },
+            "mode": {
+              "$ref": "#/$defs/file-mode"
+            },
+            "extract": {
+              "type": [
+                "array",
+                "object"
+              ]
+            }
+          }
+        },
+        "shell": {
+          "$ref": "#/$defs/shell-config"
+        },
+        "then": {
+          "$ref": "#/$defs/plugin-list"
+        }
+      },
+      "additionalProperties": {
+        "type": [
+          "object",
+          "null"
+        ],
+        "required": false,
+        "properties": {
+          "force": {
+            "type": "boolean",
+            "default": false
+          },
+          "recursive": {
+            "type": "boolean",
+            "default": false
+          }
+        }
+      }
+    },
+    "download": {
+      "type": "object",
+      "required": [
+        "download"
+      ],
+      "properties": {
+        "download": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/download-config"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/download-config"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "download-config": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "object",
+          "string"
+        ],
+        "required": [
+          "url"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "force": {
+            "type": "boolean",
+            "default": false
+          },
+          "mkdirs": {
+            "type": "boolean",
+            "default": true
+          },
+          "mode": {
+            "$ref": "#/$defs/file-mode"
+          },
+          "extract": {
+            "type": [
+              "array",
+              "object"
+            ]
+          }
+        }
+      }
+    },
+    "sharkdp": {
+      "type": "object",
+      "required": [
+        "sharkdp"
+      ],
+      "properties": {
+        "sharkdp": {
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "string"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "file-mode": {
+      "type": [
+        "integer",
+        "string"
+      ]
+    }
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/plugin-list"
+    },
+    {
+      "$ref": "#/$defs/dotbot"
+    }
+  ]
+}
