@@ -1,8 +1,10 @@
 package utils
 
 import (
+	"bufio"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
+	"golang.org/x/sys/execabs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -48,5 +50,54 @@ func EnsureInBaseDir() {
 		if err != nil {
 			log.Fatalln("Unable to access dotfiles directory", err)
 		}
+	}
+}
+
+var isMusl = -1
+
+func IsMusl() bool {
+	if isMusl > -1 {
+		return isMusl == 0
+	}
+	isLibcMusl, err := isLibcMusl()
+	if err != nil {
+		log.Fatalln("failed detecting system libc", err)
+	}
+	if isLibcMusl {
+		isMusl = 0
+		return true
+	} else {
+		isMusl = 1
+		return false
+	}
+}
+
+func isLibcMusl() (bool, error) {
+	// perform quick file checks
+	if _, err := os.Stat("/lib/ld-musl-x86_64.so.1"); err == nil {
+		return true, nil
+	}
+	if _, err := os.Stat("/lib64/ld-linux-x86-64.so.2"); err == nil {
+		return false, nil
+	}
+	// fallback to checking ldd
+	cmd := execabs.Command("ldd", "--version")
+	stdout, err := cmd.StdoutPipe()
+	if err != nil {
+		return false, err
+	}
+	reader := bufio.NewReader(stdout)
+	err = cmd.Start()
+	if err != nil {
+		return false, err
+	}
+	line, err := reader.ReadString('\n')
+	if err != nil {
+		return false, err
+	}
+	if strings.HasPrefix(line, "musl") {
+		return true, nil
+	} else {
+		return false, nil
 	}
 }

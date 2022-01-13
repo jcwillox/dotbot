@@ -51,6 +51,7 @@ func getDirective(key string) Plugin {
 		"install":  &InstallBase{},
 		"link":     &LinkBase{},
 		"package":  &PackageBase{},
+		"sharkdp":  &SharkdpBase{},
 		"shell":    &ShellBase{},
 	}[key]
 }
