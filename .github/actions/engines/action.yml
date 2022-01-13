@@ -1,0 +1,13 @@
+name: "Extract engines"
+description: "Extract engines from repository"
+outputs:
+  go:
+    description: "go version"
+    value: ${{ steps.engines.outputs.go }}
+runs:
+  using: "composite"
+  steps:
+    - id: engines
+      shell: bash
+      run: |
+        echo ::set-output name=go::$(cat go.mod | grep -m 1 -oE 'go [0-9]+.[0-9\.]+' | cut -d ' ' -f 2)

@@ -1,0 +1,35 @@
+name: 'Publish'
+
+on:
+  release:
+    types: [ published ]
+
+jobs:
+  publish:
+    name: Publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout the repository"
+        uses: actions/checkout@v2
+
+      - name: "Extract engines"
+        id: engines
+        uses: ./.github/actions/engines
+
+      - name: "Setup go"
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ steps.engines.outputs.go }}
+
+      - name: "Run GoReleaser"
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: release --rm-dist --skip-publish
+
+      - name: "Upload assets"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd dist/
+          gh release upload ${{ github.event.release.tag_name }} checksums.txt $(cat checksums.txt | cut -d ' ' -f 3)

@@ -1,0 +1,42 @@
+name: 'CI'
+
+on: [ push, pull_request ]
+
+jobs:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout the repository"
+        uses: actions/checkout@v2
+
+      - name: "Extract engines"
+        id: engines
+        uses: ./.github/actions/engines
+
+      - name: "Setup go"
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ steps.engines.outputs.go }}
+
+      - name: "Check format"
+        run: gofmt -l .
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: "Checkout the repository"
+        uses: actions/checkout@v2
+
+      - name: "Extract engines"
+        id: engines
+        uses: ./.github/actions/engines
+
+      - name: "Setup go"
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ steps.engines.outputs.go }}
+
+      - name: "Run Build"
+        run: go build -o dotbot.test ./dotbot
