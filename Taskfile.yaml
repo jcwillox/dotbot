@@ -35,6 +35,11 @@ tasks:
       GOOS: "{{.GOOS}}"
       GOARCH: "{{.GOARCH}}"
 
+  build-all:
+    desc: Build binaries for all platforms
+    cmds:
+      - goreleaser build --rm-dist --snapshot
+
   docker:
     desc: Build & run docker container
     cmds:

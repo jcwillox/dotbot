@@ -11,6 +11,8 @@ jobs:
     steps:
       - name: "Checkout the repository"
         uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
 
       - name: "Extract engines"
         id: engines

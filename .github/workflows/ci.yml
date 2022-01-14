@@ -40,6 +40,7 @@ jobs:
 
       - name: "Cache dependencies"
         uses: actions/cache@v2
+        if: "!env.ACT"
         with:
           path: |
             ~/go/pkg/mod
@@ -48,5 +49,8 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: "Run Build"
-        run: go build -o dotbot.test ./dotbot
+      - name: "Run GoReleaser"
+        uses: goreleaser/goreleaser-action@v2
+        with:
+          version: latest
+          args: build --rm-dist --snapshot
