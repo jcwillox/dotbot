@@ -38,5 +38,15 @@ jobs:
         with:
           go-version: ${{ steps.engines.outputs.go }}
 
+      - name: "Cache dependencies"
+        uses: actions/cache@v2
+        with:
+          path: |
+            ~/go/pkg/mod
+            ~/.cache/go-build
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
       - name: "Run Build"
         run: go build -o dotbot.test ./dotbot
