@@ -65,7 +65,10 @@ archives:
       386: i386
 
 nfpms:
-  - license: MIT
+  - file_name_template: '{{ .PackageName }}_{{ .Version }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+    replacements:
+      386: i386
+    license: MIT
     maintainer: Joshua Cowie-Willox <joshwillox@gmail.com>
     homepage: https://github.com/jcwillox/dotbot
     description: "A powerful bootstrapping utility for your dotfiles and system"
