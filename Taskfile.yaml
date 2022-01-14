@@ -50,3 +50,13 @@ tasks:
     desc: Scaffolds a new plugin
     cmds:
       - python ./scripts/add_plugin.py {{.CLI_ARGS}}
+
+  completions:
+    desc: Regenerate completion files
+    cmds:
+      - go build -o dotbot.completions ./dotbot
+      - dotbot.completions completion bash > ./completions/dotbot.sh
+      - dotbot.completions completion zsh > ./completions/dotbot.zsh
+      - dotbot.completions completion fish > ./completions/dotbot.fish
+      - dotbot.completions completion powershell > ./completions/dotbot.ps1
+      - "{{if eq OS \"windows\"}}cmd /c del{{else}}rm{{end}} dotbot.completions"

@@ -39,7 +39,7 @@ Register-ArgumentCompleter -CommandName $cmdNames -ScriptBlock {
     if ($Command.Length -gt $CursorPosition) {
         $Command=$Command.Substring(0,$CursorPosition)
     }
-	__dotbot_debug "Truncated command: $Command"
+    __dotbot_debug "Truncated command: $Command"
 
     $ShellCompDirectiveError=1
     $ShellCompDirectiveNoSpace=2
@@ -47,7 +47,7 @@ Register-ArgumentCompleter -CommandName $cmdNames -ScriptBlock {
     $ShellCompDirectiveFilterFileExt=8
     $ShellCompDirectiveFilterDirs=16
 
-	# Prepare the command to request completions for the program.
+    # Prepare the command to request completions for the program.
     # Split the command at the first space to separate the program and arguments.
     $Program,$Arguments = $Command.Split(" ",2)
     $RequestComp="$Program __complete $Arguments"
@@ -222,7 +222,7 @@ Register-ArgumentCompleter -CommandName $cmdNames -ScriptBlock {
             Default {
                 # Like MenuComplete but we don't want to add a space here because
                 # the user need to press space anyway to get the completion.
-                # Description will not be shown because thats not possible with TabCompleteNext
+                # Description will not be shown because that's not possible with TabCompleteNext
                 [System.Management.Automation.CompletionResult]::new($($comp.Name | __dotbot_escapeStringWithSpecialChars), "$($comp.Name)", 'ParameterValue', "$($comp.Description)")
             }
         }

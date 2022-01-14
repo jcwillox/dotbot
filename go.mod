@@ -11,9 +11,9 @@ require (
 	github.com/klauspost/compress v1.13.6
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/shirou/gopsutil v3.21.10+incompatible
-	github.com/spf13/cobra v1.2.1
+	github.com/spf13/cobra v1.3.0
 	github.com/vbauerster/mpb/v7 v7.1.5
-	golang.org/x/sys v0.0.0-20211124211545-fe61309f8881
+	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
@@ -34,7 +34,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
-	github.com/mattn/go-colorable v0.1.11 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
