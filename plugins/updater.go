@@ -72,7 +72,7 @@ func UpdaterUpdate() {
 	asset := "dotbot_" + latest + "_" + runtime.GOOS + "_" + arch + ext
 
 	// download archive
-	err = DownloadConfig{
+	dl := DownloadConfig{
 		Url:  store.RepoUrl + "/releases/download/" + latest + "/" + asset,
 		Mode: 438,
 		Extract: ExtractItems{
@@ -81,7 +81,8 @@ func UpdaterUpdate() {
 				Path:   exeExtractNew,
 			},
 		},
-	}.Run()
+	}
+	err = dl.Run()
 	if err != nil {
 		log.Fatalln("failed to download or extract archive", err)
 	}

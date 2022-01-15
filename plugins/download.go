@@ -78,16 +78,12 @@ func (b DownloadBase) RunAll() error {
 
 var downloadLogger = log.GetLogger(emerald.ColorCode("blue+b"), "DOWNLOAD", emerald.Yellow)
 
-func (c DownloadConfig) Run() error {
+func (c *DownloadConfig) Run() error {
 	var f *os.File
-	var err error
-	// allow url templating
-	if template.HasTemplate(c.Url) {
-		result, err := template.Parse(c.Url).Render()
-		if err != nil {
-			return err
-		}
-		c.Url = result
+	// allow templating
+	err := template.RenderField(&c.Url, &c.Path)
+	if err != nil {
+		return err
 	}
 	// special handling of urls starting with '/'
 	if strings.HasPrefix(c.Url, "/") {
@@ -145,6 +141,7 @@ func (c DownloadConfig) Run() error {
 			return err
 		}
 	}
+
 	// get actual download length
 	head, err := http.Head(c.Url)
 	if err != nil {

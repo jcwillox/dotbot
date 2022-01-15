@@ -57,13 +57,14 @@ var downloadCmd = &cobra.Command{
 }
 
 func downloadFile(url string, path string, mode utils.WeakFileMode) {
-	err := plugins.DownloadConfig{
+	dl := plugins.DownloadConfig{
 		Url:    url,
 		Path:   path,
 		Mode:   mode,
 		Force:  dwFlags.Force,
 		Mkdirs: true,
-	}.Run()
+	}
+	err := dl.Run()
 	if err != nil {
 		log.Fatalln("Failed downloading file", err)
 	}
