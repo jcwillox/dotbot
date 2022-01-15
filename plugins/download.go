@@ -81,7 +81,6 @@ var downloadLogger = log.GetLogger(emerald.ColorCode("blue+b"), "DOWNLOAD", emer
 func (c DownloadConfig) Run() error {
 	var f *os.File
 	var err error
-	defer f.Close()
 	// allow url templating
 	if template.HasTemplate(c.Url) {
 		result, err := template.Parse(c.Url).Render()
@@ -184,6 +183,12 @@ func (c DownloadConfig) Run() error {
 		p.Wait()
 	} else {
 		_, err = io.Copy(f, resp.Body)
+		if err != nil {
+			return err
+		}
+	}
+	err = f.Close()
+	if err != nil {
 		return err
 	}
 	if c.Extract != nil && len(c.Extract) > 0 {
