@@ -22,6 +22,16 @@ If you only specify your username its assumed the repo is called `dotfiles`.
 sh -c "$(curl -fsSL tinyurl.com/dotbot)" -- init --apply <owner>[/<repo>]
 ```
 
+**Windows**
+
+```pwsh
+iwr -useb tinyurl.com/dotbot-ps1 | iex
+```
+
+```pwsh
+iwr -useb tinyurl.com/dotbot-ps1 | iex; dotbot init --apply <owner>[/<repo>]
+```
+
 ## Usage
 
 Proper documentation will arrive soon, for a sneak peek checkout my personal dotfiles [repo](https://github.com/jcwillox/dotfiles).
