@@ -101,3 +101,15 @@ func isLibcMusl() (bool, error) {
 		return false, nil
 	}
 }
+
+func ExecutablePath() string {
+	path, err := os.Executable()
+	if err != nil {
+		log.Panicln("failed to get dotbot executable path", err)
+	}
+	path, err = filepath.Abs(path)
+	if err != nil {
+		log.Panicln("failed to get dotbot absolute path", err)
+	}
+	return path
+}

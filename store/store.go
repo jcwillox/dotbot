@@ -2,7 +2,7 @@ package store
 
 import (
 	"encoding/json"
-	"log"
+	"github.com/jcwillox/dotbot/log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -14,6 +14,7 @@ var (
 	RegisteredGroups []string
 	HomeDirectory    string
 	Version          = "devel"
+	RepoUrl          = "https://github.com/jcwillox/dotbot"
 )
 
 var (

@@ -2,11 +2,11 @@ package plugins
 
 import (
 	"fmt"
+	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/template"
 	"github.com/jcwillox/dotbot/yamltools"
 	"gopkg.in/yaml.v3"
-	"log"
 	"os"
 )
 
@@ -15,6 +15,7 @@ type Config struct {
 	Profiles       ProfilesBase
 	DefaultProfile DefaultProfileBase `yaml:"default_profile"`
 	UpdateRepo     *bool              `yaml:"update_repo"`
+	UpdateDotbot   *bool              `yaml:"update_dotbot"`
 	StripPath      StripPathBase      `yaml:"strip_path"`
 	Vars           map[string]interface{}
 }
@@ -98,7 +99,7 @@ func (c Config) RunAll(useBasic ...bool) bool {
 	c.StripPath.Run()
 
 	if useBasic == nil {
-		if c.UpdateRepo == nil || *c.UpdateRepo == true {
+		if (c.UpdateRepo == nil || *c.UpdateRepo == true) && os.Getenv("DOTBOT_NO_UPDATE_REPO") != "1" {
 			err := GitConfig{
 				Path:    store.BaseDir(),
 				Name:    "dotfiles",
@@ -106,12 +107,15 @@ func (c Config) RunAll(useBasic ...bool) bool {
 				Shallow: false,
 			}.Run()
 			if err != nil {
-				log.Fatalln("failed to clone/pull:", err)
+				log.Fatalln("failed to update dotfiles repo:", err)
 				return false
 			}
 			if DidGitUpdate {
 				return true
 			}
+		}
+		if c.UpdateDotbot == nil || *c.UpdateDotbot == true {
+			UpdaterUpdate()
 		}
 	}
 
