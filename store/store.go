@@ -124,3 +124,41 @@ func RemoveTempFiles() {
 	}
 	tempFiles = tempFiles[:0]
 }
+
+var tmplVars = make(map[string]interface{})
+
+func Vars(vars map[string]interface{}) {
+	for key, newVal := range vars {
+		tmplVars[key] = newVal
+	}
+}
+
+func GetVar(key string) (value interface{}, present bool) {
+	value, present = tmplVars[key]
+	return value, present
+}
+
+func GetVars() map[string]interface{} {
+	return tmplVars
+}
+
+func VarsClosure(vars map[string]interface{}) func() {
+	prev := make(map[string]interface{})
+	for key, newVal := range vars {
+		if val, present := tmplVars[key]; present {
+			prev[key] = val
+		}
+		tmplVars[key] = newVal
+	}
+	return func() {
+		// iterate over changed keys and restore old value
+		for key := range vars {
+			if val, present := prev[key]; present {
+				tmplVars[key] = val
+			} else {
+				// remove key if no old value
+				delete(tmplVars, key)
+			}
+		}
+	}
+}

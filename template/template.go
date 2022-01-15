@@ -2,6 +2,9 @@ package template
 
 import (
 	"bytes"
+	"github.com/jcwillox/dotbot/store"
+	"github.com/jcwillox/dotbot/utils"
+	"golang.org/x/sys/execabs"
 	"os"
 	"runtime"
 	"strings"
@@ -14,47 +17,12 @@ var funcs = map[string]interface{}{
 	"MatchDistro":  MatchDistro,
 	"OS":           func() string { return runtime.GOOS },
 	"ARCH":         func() string { return runtime.GOARCH },
-	"IsWSL":        IsWSL,
-	"DefaultShell": DefaultShell,
-	"Which":        Which,
-}
-
-var tmplVars = make(map[string]interface{})
-
-func Vars(vars map[string]interface{}) {
-	for key, newVal := range vars {
-		tmplVars[key] = newVal
-	}
-}
-
-func GetVar(key string) (value interface{}, present bool) {
-	value, present = tmplVars[key]
-	return value, present
-}
-
-func GetVars() map[string]interface{} {
-	return tmplVars
-}
-
-func VarsClosure(vars map[string]interface{}) func() {
-	prev := make(map[string]interface{})
-	for key, newVal := range vars {
-		if val, present := tmplVars[key]; present {
-			prev[key] = val
-		}
-		tmplVars[key] = newVal
-	}
-	return func() {
-		// iterate over changed keys and restore old value
-		for key := range vars {
-			if val, present := prev[key]; present {
-				tmplVars[key] = val
-			} else {
-				// remove key if no old value
-				delete(tmplVars, key)
-			}
-		}
-	}
+	"IsWSL":        utils.IsWSL,
+	"DefaultShell": utils.DefaultShell,
+	"Which": func(file string) string {
+		path, _ := execabs.LookPath(file)
+		return path
+	},
 }
 
 type Template struct {
@@ -85,7 +53,7 @@ func Funcs(funcMap template.FuncMap) *Template {
 
 func (t *Template) Render() (string, error) {
 	var buff bytes.Buffer
-	err := t.Template.Execute(&buff, tmplVars)
+	err := t.Template.Execute(&buff, store.GetVars())
 	return buff.String(), err
 }
 

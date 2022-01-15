@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"github.com/jcwillox/dotbot/template"
 	"golang.org/x/sys/execabs"
 	"log"
 	"os"
@@ -17,7 +16,7 @@ func PathHasExecutable(file string) bool {
 // this provides a significant performance improvement as it normally includes many
 // large networked windows directories which are very slow to access
 func StripPath(paths ...string) {
-	if paths == nil || !template.IsWSL() {
+	if paths == nil || !IsWSL() {
 		return
 	}
 	envPath := os.Getenv("PATH")

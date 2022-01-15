@@ -2,7 +2,7 @@ package sudo
 
 import (
 	"bytes"
-	"github.com/jcwillox/dotbot/template"
+	"github.com/jcwillox/dotbot/store"
 	"golang.org/x/sys/execabs"
 	"gopkg.in/yaml.v3"
 	"log"
@@ -50,7 +50,7 @@ func Configs(configs interface{}) error {
 		return os.ErrPermission
 	}
 
-	vars := template.GetVars()
+	vars := store.GetVars()
 	if len(vars) > 0 {
 		configs = map[string]interface{}{"config": configs, "vars": vars}
 	}

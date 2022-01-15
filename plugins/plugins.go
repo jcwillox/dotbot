@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
-	"github.com/jcwillox/dotbot/template"
 	"github.com/jcwillox/dotbot/yamltools"
 	"gopkg.in/yaml.v3"
 	"os"
@@ -95,7 +94,7 @@ func FromBytes(data []byte) (Config, error) {
 
 // RunAll runs all configs returns true if the config should be reloaded
 func (c Config) RunAll(useBasic ...bool) bool {
-	template.Vars(c.Vars)
+	store.Vars(c.Vars)
 	c.StripPath.Run()
 
 	if useBasic == nil {

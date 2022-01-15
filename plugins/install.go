@@ -86,7 +86,7 @@ func (c InstallConfig) Run() error {
 
 	logInstall(c.String(), current, version)
 	if current != version {
-		defer template.VarsClosure(map[string]interface{}{"Current": current, "Version": version, "Url": c.Url})()
+		defer store.VarsClosure(map[string]interface{}{"Current": current, "Version": version, "Url": c.Url})()
 
 		// merge shorthand directives into then block
 		then := make(PluginList, 0, 2)

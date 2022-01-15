@@ -91,7 +91,7 @@ func (c DownloadConfig) Run() error {
 	}
 	// special handling of urls starting with '/'
 	if strings.HasPrefix(c.Url, "/") {
-		if url, present := template.GetVar("Url"); present {
+		if url, present := store.GetVar("Url"); present {
 			c.Url = url.(string) + c.Url
 		}
 	}
@@ -114,7 +114,7 @@ func (c DownloadConfig) Run() error {
 		}
 		// track temp file for deletion
 		store.TrackTempFile(f.Name())
-		template.Vars(map[string]interface{}{"Path": f.Name()})
+		store.Vars(map[string]interface{}{"Path": f.Name()})
 	} else {
 		// extract filename
 		path := utils.ExpandUser(c.Path)
