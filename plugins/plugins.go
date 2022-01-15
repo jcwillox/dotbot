@@ -99,6 +99,9 @@ func (c Config) RunAll(useBasic ...bool) bool {
 	c.StripPath.Run()
 
 	if useBasic == nil {
+		if c.UpdateDotbot == nil || *c.UpdateDotbot == true {
+			UpdaterUpdate()
+		}
 		if (c.UpdateRepo == nil || *c.UpdateRepo == true) && os.Getenv("DOTBOT_NO_UPDATE_REPO") != "1" {
 			err := GitConfig{
 				Path:    store.BaseDir(),
@@ -113,9 +116,6 @@ func (c Config) RunAll(useBasic ...bool) bool {
 			if DidGitUpdate {
 				return true
 			}
-		}
-		if c.UpdateDotbot == nil || *c.UpdateDotbot == true {
-			UpdaterUpdate()
 		}
 	}
 
