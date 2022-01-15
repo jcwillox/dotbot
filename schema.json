@@ -48,6 +48,9 @@
         },
         {
           "$ref": "#/$defs/sharkdp"
+        },
+        {
+          "$ref": "#/$defs/if"
         }
       ]
     },
@@ -605,6 +608,45 @@
               }
             }
           ]
+        }
+      }
+    },
+    "if": {
+      "type": "object",
+      "required": [
+        "if"
+      ],
+      "properties": {
+        "if": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/if-config"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/if-config"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "if-config": {
+      "type": "object",
+      "required": [
+        "condition"
+      ],
+      "properties": {
+        "condition": {
+          "$ref": "#/$defs/nested-string-array"
+        },
+        "then": {
+          "$ref": "#/$defs/plugin-list"
+        },
+        "else": {
+          "$ref": "#/$defs/plugin-list"
         }
       }
     },

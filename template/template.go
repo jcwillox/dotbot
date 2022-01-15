@@ -68,6 +68,14 @@ func (t *Template) Render() (string, error) {
 	return buff.String(), err
 }
 
+func (t *Template) RenderTrue() (bool, error) {
+	result, err := t.Render()
+	if err != nil {
+		return false, err
+	}
+	return strings.EqualFold(result, "true"), nil
+}
+
 // HasTemplate returns true if the string has '{{' followed by '}}'
 func HasTemplate(tmpl string) bool {
 	first := strings.Index(tmpl, "{{")
