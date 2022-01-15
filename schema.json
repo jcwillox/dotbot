@@ -60,7 +60,45 @@
         "config": {
           "$ref": "#/$defs/plugin-list"
         },
-        "profiles": {}
+        "profiles": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/nested-string-array"
+          }
+        },
+        "default_profile": {
+          "type": ["object", "array"],
+          "minItems": 1,
+          "items": {
+            "type": ["string", "object"]
+          }
+        },
+        "update_repo": {
+          "type": "boolean",
+          "description": "Pull dotfiles repository each time you run dotbot",
+          "default": true
+        },
+        "update_dotbot": {
+          "type": "boolean",
+          "description": "Check and update dotbot automatically if a new version is available",
+          "default": true
+        },
+        "strip_path": {
+          "type": ["boolean", "array"],
+          "description": "Strip specified paths from PATH environment variable, particularly effective for WSL distros, setting it to `true` will exclude `/mnt/c`",
+          "default": false,
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "vars": {
+          "type": "object",
+          "description": "Key-value pairs that are added to the template namespace",
+          "properties": {
+            "type": "string"
+          }
+        }
       }
     },
     "link": {
@@ -575,6 +613,13 @@
         "integer",
         "string"
       ]
+    },
+    "nested-string-array": {
+      "type": ["string", "array"],
+      "minItems": 1,
+      "items": {
+        "$ref": "#/$defs/nested-string-array"
+      }
     }
   },
   "oneOf": [
