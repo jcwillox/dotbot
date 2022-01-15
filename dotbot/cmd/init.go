@@ -44,6 +44,7 @@ var initCmd = &cobra.Command{
 		store.SetSave("directory", filepath.Join(cwd, name))
 
 		if apply {
+			_ = os.Setenv("DOTBOT_NO_UPDATE_REPO", "1")
 			rootCmd.Run(rootCmd, nil)
 		}
 	},
