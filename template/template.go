@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/utils"
+	"github.com/jcwillox/dotbot/utils/sudo"
 	"golang.org/x/sys/execabs"
 	"os"
 	"runtime"
@@ -17,11 +18,20 @@ var funcs = map[string]interface{}{
 	"MatchDistro":  MatchDistro,
 	"OS":           func() string { return runtime.GOOS },
 	"ARCH":         func() string { return runtime.GOARCH },
-	"IsWSL":        utils.IsWSL,
 	"DefaultShell": utils.DefaultShell,
+	"IsWSL":        utils.IsWSL,
+	"IsMusl":       utils.IsMusl,
+	"IsRoot":       sudo.IsRoot,
+	"CanSudo":      sudo.CanSudo,
 	"Which": func(file string) string {
 		path, _ := execabs.LookPath(file)
 		return path
+	},
+	"LIBC": func() string {
+		if utils.IsMusl() {
+			return "musl"
+		}
+		return "gnu"
 	},
 }
 
