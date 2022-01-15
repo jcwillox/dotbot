@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func PathHasExecutable(file string) bool {
+func OnPath(file string) bool {
 	path, _ := execabs.LookPath(file)
 	return path != ""
 }

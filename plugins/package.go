@@ -66,7 +66,7 @@ func (p PackageConfig) Run() error {
 		if c.Manager == "os" {
 			c.Manager = getOsPackager()
 		}
-		if utils.PathHasExecutable(c.Manager) {
+		if utils.OnPath(c.Manager) {
 			return c.InstallAll()
 		}
 	}
@@ -136,9 +136,9 @@ func logPackage(pkg string, version string, latest string) {
 
 func getOsPackager() string {
 	switch {
-	case utils.PathHasExecutable("apt"):
+	case utils.OnPath("apt"):
 		return "apt"
-	case utils.PathHasExecutable("apk"):
+	case utils.OnPath("apk"):
 		return "apk"
 	default:
 		return ""
