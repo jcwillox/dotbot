@@ -62,9 +62,10 @@ archives:
       - completions/dotbot.sh
     replacements:
       386: i386
+    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
 
 nfpms:
-  - file_name_template: '{{ .PackageName }}_{{ .Version }}_{{ .Arch }}{{ if .Arm }}v{{ .Arm }}{{ end }}'
+  - file_name_template: '{{ .PackageName }}_{{ .Version }}_{{ .Arch }}'
     replacements:
       386: i386
     license: MIT
