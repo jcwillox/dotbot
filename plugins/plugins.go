@@ -5,6 +5,7 @@ import (
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/yamltools"
+	"github.com/jcwillox/emerald"
 	"gopkg.in/yaml.v3"
 	"os"
 )
@@ -41,7 +42,7 @@ type Plugin interface {
 }
 
 func getDirective(key string) Plugin {
-	return map[string]Plugin{
+	plugin, present := map[string]Plugin{
 		"clean":    &CleanBase{},
 		"create":   &CreateBase{},
 		"download": &DownloadBase{},
@@ -55,6 +56,10 @@ func getDirective(key string) Plugin {
 		"sharkdp":  &SharkdpBase{},
 		"shell":    &ShellBase{},
 	}[key]
+	if !present {
+		return nil
+	}
+	return plugin
 }
 
 func (c *PluginList) UnmarshalYAML(n *yaml.Node) error {
@@ -65,6 +70,10 @@ func (c *PluginList) UnmarshalYAML(n *yaml.Node) error {
 		keys := yamltools.MapKeys(node)
 		// lookup concrete type
 		plugin := getDirective(keys[0])
+		if plugin == nil {
+			log.Log(emerald.Yellow, "WARN", emerald.Yellow, "skipping unknown directive '"+keys[0]+"'")
+			continue
+		}
 		// decode into type
 		err := node.Content[1].Decode(plugin)
 		if err != nil {
