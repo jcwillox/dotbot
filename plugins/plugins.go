@@ -99,21 +99,15 @@ func (c Config) RunAll(useBasic ...bool) bool {
 	c.StripPath.Run()
 
 	if useBasic == nil {
-		if c.UpdateDotbot == nil || *c.UpdateDotbot == true {
+		if (c.UpdateDotbot == nil || *c.UpdateDotbot == true) && os.Getenv("DOTBOT_NO_UPDATE") != "1" {
 			UpdaterUpdate()
 		}
 		if (c.UpdateRepo == nil || *c.UpdateRepo == true) && os.Getenv("DOTBOT_NO_UPDATE_REPO") != "1" {
-			err := GitConfig{
-				Path:    store.BaseDir(),
-				Name:    "dotfiles",
-				Method:  "pull",
-				Shallow: false,
-			}.Run()
+			didUpdate, err := UpdaterUpdateRepo()
 			if err != nil {
 				log.Fatalln("failed to update dotfiles repo:", err)
-				return false
 			}
-			if DidGitUpdate {
+			if didUpdate {
 				return true
 			}
 		}

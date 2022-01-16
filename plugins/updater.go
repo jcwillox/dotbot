@@ -15,10 +15,6 @@ import (
 )
 
 func UpdaterUpdate() {
-	if os.Getenv("DOTBOT_NO_UPDATE") == "1" {
-		return
-	}
-
 	latest, err := GetGithubVersion(store.RepoUrl)
 	if err != nil {
 		log.Fatalln("failed to get latest version of dotbot", err)
@@ -114,6 +110,16 @@ func UpdaterUpdate() {
 			log.Fatalln("failed to automatically restart dotbot", err)
 		}
 	}
+}
+
+func UpdaterUpdateRepo() (bool, error) {
+	err := GitConfig{
+		Path:    store.BaseDir(),
+		Name:    "dotfiles",
+		Method:  "pull",
+		Shallow: false,
+	}.Run()
+	return DidGitUpdate, err
 }
 
 func UpdaterCleanup() {
