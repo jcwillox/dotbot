@@ -5,7 +5,6 @@ import (
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/yamltools"
-	"github.com/jcwillox/emerald"
 	"gopkg.in/yaml.v3"
 	"os"
 )
@@ -71,7 +70,7 @@ func (c *PluginList) UnmarshalYAML(n *yaml.Node) error {
 		// lookup concrete type
 		plugin := getDirective(keys[0])
 		if plugin == nil {
-			log.Log(emerald.Yellow, "WARN", emerald.Yellow, "skipping unknown directive '"+keys[0]+"'")
+			log.Warnf("skipping unknown directive '%s'\n", keys[0])
 			continue
 		}
 		// decode into type

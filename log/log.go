@@ -3,7 +3,12 @@ package log
 import (
 	"fmt"
 	"github.com/jcwillox/emerald"
+	"github.com/mattn/go-colorable"
 	"os"
+)
+
+var (
+	Stderr = colorable.NewColorableStdout()
 )
 
 func GetLogger(color string, name string, tagColor string) Logger {
@@ -112,30 +117,88 @@ func (l Logger) LogPathC(color string, tag string, path1 string, path2 string) {
 	emerald.Print(path1, emerald.LightBlack, " -> ", emerald.Reset, path2, "\n")
 }
 
-var colorError = emerald.ColorCode("red+b")
+// Warn  - program will always continue
+// Error - recoverable, user can set these to be ignored
+// Fatal - will always exit the program
+// Panic - will always crash the program
 
-func Log(colorTag string, tag string, color string, a ...interface{}) {
-	emerald.Print("[")
-	if emerald.ColorEnabled {
-		emerald.Print(colorTag)
+func tag(color string, tag string) {
+	fmt.Fprint(Stderr, "[", color, tag, emerald.Reset, "] ", color)
+}
+
+var (
+	errorTag = func() {
+		tag(emerald.LightRed, "ERROR")
 	}
-	emerald.Print(tag, emerald.Reset, "] ", color)
-	emerald.Println(a...)
-	emerald.Print(emerald.Reset)
+	warnTag = func() {
+		tag(emerald.Yellow, "WARN")
+	}
+	fatalTag = func() {
+		tag(emerald.Bold+emerald.LightRed, "FATAL")
+	}
+	panicTag = func() {
+		tag(emerald.Bold+emerald.LightMagenta, "PANIC")
+	}
+)
+
+func Warn(a ...interface{}) {
+	warnTag()
+	fmt.Fprint(Stderr, a...)
+	fmt.Fprint(Stderr, emerald.Reset)
+}
+
+func Warnf(format string, a ...interface{}) {
+	warnTag()
+	fmt.Fprintf(Stderr, format, a...)
+	fmt.Fprint(Stderr, emerald.Reset)
+}
+
+func Warnln(a ...interface{}) {
+	Warn(a...)
+	fmt.Fprintln(Stderr)
 }
 
 func Error(a ...interface{}) {
-	Log(colorError, "ERROR", emerald.Red, a...)
+	errorTag()
+	fmt.Fprint(Stderr, a...)
+	fmt.Fprint(Stderr, emerald.Reset)
+}
+
+func Errorf(format string, a ...interface{}) {
+	errorTag()
+	fmt.Fprintf(Stderr, format, a...)
+	fmt.Fprint(Stderr, emerald.Reset)
+}
+
+func Errorln(a ...interface{}) {
+	Error(a...)
+	fmt.Fprintln(Stderr)
+}
+
+func Fatal(a ...interface{}) {
+	fatalTag()
+	fmt.Fprint(Stderr, a...)
+	fmt.Fprint(Stderr, emerald.Reset)
+	os.Exit(1)
+}
+
+func Fatalf(format string, a ...interface{}) {
+	fatalTag()
+	fmt.Fprintf(Stderr, format, a...)
+	fmt.Fprint(Stderr, emerald.Reset)
+	os.Exit(1)
 }
 
 func Fatalln(a ...interface{}) {
-	fmt.Fprint(os.Stderr, "[FATAL] ")
-	fmt.Fprintln(os.Stderr, a...)
+	fatalTag()
+	fmt.Fprint(Stderr, a...)
+	fmt.Fprintln(Stderr, emerald.Reset)
 	os.Exit(1)
 }
 
 func Panicln(a ...interface{}) {
+	panicTag()
 	s := fmt.Sprintln(a...)
-	fmt.Fprint(os.Stderr, "[PANIC] ", s)
+	fmt.Fprint(Stderr, s, emerald.Reset)
 	panic(s)
 }

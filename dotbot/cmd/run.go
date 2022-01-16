@@ -44,7 +44,7 @@ var runCmd = &cobra.Command{
 				}
 			}
 		} else {
-			utils.EnsureInBaseDir()
+			_ = utils.ChBaseDir()
 			if fromStdin {
 				data, err := io.ReadAll(os.Stdin)
 				if err != nil {

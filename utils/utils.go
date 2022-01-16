@@ -2,6 +2,7 @@ package utils
 
 import (
 	"bufio"
+	"errors"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"golang.org/x/sys/execabs"
@@ -46,13 +47,15 @@ func GetConfigPath() string {
 	return ""
 }
 
-func EnsureInBaseDir() {
+func ChBaseDir() error {
 	if base, present := store.HasGet("directory"); present {
 		err := os.Chdir(base)
 		if err != nil {
-			log.Fatalln("Unable to access dotfiles directory", err)
+			return errors.New("unable to access dotfiles directory: " + err.Error())
 		}
+		return nil
 	}
+	return errors.New("dotfiles directory is not configured")
 }
 
 func IsWSL() bool {

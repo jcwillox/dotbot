@@ -5,7 +5,6 @@ import (
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/utils"
-	"github.com/jcwillox/emerald"
 	"net/http"
 	"os"
 	"os/exec"
@@ -41,7 +40,7 @@ func UpdaterUpdate() {
 	exeOld := filepath.Join(filepath.Dir(exe), "."+filepath.Base(exe)+".old")
 
 	if !utils.IsWritable(exe) {
-		log.Log(emerald.Yellow, "WARN", emerald.Yellow, "skipping update as user does not have sufficient permissions")
+		log.Warnln("skipping update as user does not have sufficient permissions")
 		return
 	}
 

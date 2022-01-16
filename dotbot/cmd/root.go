@@ -22,7 +22,10 @@ var rootCmd = &cobra.Command{
 	Short:   "",
 	Version: store.Version,
 	Run: func(cmd *cobra.Command, args []string) {
-		utils.EnsureInBaseDir()
+		err := utils.ChBaseDir()
+		if err != nil {
+			log.Fatalln(err)
+		}
 		path := utils.GetConfigPath()
 		if loadRunConfig(path) {
 			fmt.Println("reloading configuration...")
@@ -34,7 +37,7 @@ var rootCmd = &cobra.Command{
 func loadRunConfig(path string) bool {
 	config, err := plugins.ReadConfig(path)
 	if err != nil {
-		log.Panicln("failed reading config file", err)
+		log.Fatalln("config file not found", err)
 	}
 	return config.RunAll()
 }
