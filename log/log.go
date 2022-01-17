@@ -3,6 +3,7 @@ package log
 import (
 	"fmt"
 	"github.com/jcwillox/emerald"
+	"github.com/k0kubun/pp/v3"
 	"github.com/mattn/go-colorable"
 	"golang.org/x/term"
 	"os"
@@ -10,11 +11,23 @@ import (
 )
 
 var (
-	Stderr    = colorable.NewColorableStdout()
-	ColorSudo = emerald.LightMagenta
-	ColorNew  = emerald.LightYellow
-	ColorDone = emerald.LightBlack
+	EnableDebug = false
+	Stderr      = colorable.NewColorableStdout()
+	ColorSudo   = emerald.LightMagenta
+	ColorNew    = emerald.LightYellow
+	ColorDone   = emerald.LightBlack
 )
+
+var (
+	ppLog = pp.New()
+)
+
+func init() {
+	ppLog.SetOutput(Stderr)
+	if debug := os.Getenv("DOTBOT_DEBUG"); debug == "true" || debug == "1" {
+		EnableDebug = true
+	}
+}
 
 func NewBasicLogger(name string) *Logger {
 	return &Logger{
@@ -112,11 +125,14 @@ func tag(color string, tag string) {
 }
 
 var (
-	errorTag = func() {
-		tag(emerald.LightRed, "ERROR")
+	debugTag = func() {
+		tag(emerald.LightCyan, "DEBUG")
 	}
 	warnTag = func() {
 		tag(emerald.Yellow, "WARN")
+	}
+	errorTag = func() {
+		tag(emerald.LightRed, "ERROR")
 	}
 	fatalTag = func() {
 		tag(emerald.Bold+emerald.LightRed, "FATAL")
@@ -125,6 +141,42 @@ var (
 		tag(emerald.Bold+emerald.LightMagenta, "PANIC")
 	}
 )
+
+func Debug(a ...interface{}) {
+	if !EnableDebug {
+		return
+	}
+	debugTag()
+	fmt.Fprint(Stderr, a...)
+	fmt.Fprint(Stderr, emerald.Reset)
+}
+
+func Debugf(format string, a ...interface{}) {
+	if !EnableDebug {
+		return
+	}
+	debugTag()
+	fmt.Fprintf(Stderr, format, a...)
+	fmt.Fprint(Stderr, emerald.Reset)
+}
+
+func Debugln(a ...interface{}) {
+	if !EnableDebug {
+		return
+	}
+	debugTag()
+	fmt.Fprintln(Stderr, a...)
+	fmt.Fprint(Stderr, emerald.Reset)
+}
+
+func DebugPpln(a ...interface{}) {
+	if !EnableDebug {
+		return
+	}
+	debugTag()
+	fmt.Fprint(Stderr, emerald.Reset)
+	ppLog.Println(a)
+}
 
 func Warn(a ...interface{}) {
 	warnTag()

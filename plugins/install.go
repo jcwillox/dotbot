@@ -158,7 +158,11 @@ func GetGenericVersion(url, versionTmpl string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		matches := versionRegex.FindSubmatch(data)[1]
+		log.Debugln("fetching", url)
+		matches := versionRegex.FindSubmatch(data)
+		for i, match := range matches {
+			log.Debugf("[match] %d: %s\n", i, match)
+		}
 		if len(matches) > 1 {
 			return string(matches[1]), nil
 		} else if matches == nil {
