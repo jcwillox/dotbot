@@ -91,7 +91,18 @@ func (c *DownloadConfig) Run() error {
 		if url, present := store.GetVar("Url"); present {
 			c.Url = url.(string) + c.Url
 		}
+	} else if !strings.HasPrefix(c.Url, "http") {
+		c.Url = "http://" + c.Url
 	}
+
+	// get actual download length and url
+	head, err := http.Head(c.Url)
+	if err != nil {
+		return err
+	}
+	c.Url = head.Request.URL.String()
+	log.Debugf("downloading: '%s' length=%d\n", c.Url, head.ContentLength)
+
 	// grab filename from url
 	name := filepath.Base(c.Url)
 	if c.Path == "" {
@@ -141,12 +152,7 @@ func (c *DownloadConfig) Run() error {
 			return err
 		}
 	}
-
-	// get actual download length
-	head, err := http.Head(c.Url)
-	if err != nil {
-		return err
-	}
+	log.Debugln("destination:", f.Name())
 
 	// download file
 	resp, err := http.Get(c.Url)
