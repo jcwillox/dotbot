@@ -130,7 +130,6 @@ func (c *DownloadConfig) Run() error {
 			// skip as file is already present and force is not set
 			return nil
 		}
-		name = filepath.Base(path)
 		if c.Mkdirs {
 			err := os.MkdirAll(filepath.Dir(path), os.ModePerm)
 			if err != nil {
