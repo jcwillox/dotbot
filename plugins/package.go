@@ -74,6 +74,7 @@ func (p PackageConfig) Run() error {
 }
 
 func (c PackageItem) InstallAll() error {
+	var command *utils.Command
 	switch c.Manager {
 	case "apt":
 		for _, pkg := range c.Packages {
@@ -82,16 +83,14 @@ func (c PackageItem) InstallAll() error {
 			if version == latest {
 				break
 			}
-			err := utils.Command{
+			command = &utils.Command{
 				Command: "apt-get install -qq -y " + pkg,
 				Shell:   false,
-				Stdout:  true,
+				Stdout:  false,
 				Stderr:  true,
 				Sudo:    true,
-			}.Run()
-			if err != nil {
-				return err
 			}
+
 		}
 	case "apk":
 		for _, pkg := range c.Packages {
@@ -100,19 +99,25 @@ func (c PackageItem) InstallAll() error {
 			if version == latest {
 				break
 			}
-			err := utils.Command{
+			command = &utils.Command{
 				Command: "apk add " + pkg,
 				Shell:   false,
 				Stdout:  true,
 				Stderr:  true,
 				Sudo:    true,
-			}.Run()
-			if err != nil {
-				return err
 			}
 		}
 	}
-	return nil
+	if command == nil {
+		return nil
+	}
+	cmd, err := command.Cmd()
+	if err != nil {
+		return err
+	}
+	writer := log.NewMaxLineWriter()
+	cmd.Stdout = writer
+	return cmd.Run()
 }
 
 var highlightVersion = emerald.ColorFunc("cyan+u")
