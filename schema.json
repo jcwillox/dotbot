@@ -86,6 +86,11 @@
           "description": "Check and update dotbot automatically if a new version is available",
           "default": true
         },
+        "show_total_time": {
+          "type": "boolean",
+          "description": "Prints out total time taken to run config",
+          "default": true
+        },
         "strip_path": {
           "type": ["boolean", "array"],
           "description": "Strip specified paths from PATH environment variable, particularly effective for WSL distros, setting it to `true` will exclude `/mnt/c`",

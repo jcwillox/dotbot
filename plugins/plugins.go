@@ -4,9 +4,12 @@ import (
 	"fmt"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
+	"github.com/jcwillox/dotbot/utils"
 	"github.com/jcwillox/dotbot/yamltools"
+	"github.com/jcwillox/emerald"
 	"gopkg.in/yaml.v3"
 	"os"
+	"time"
 )
 
 type Config struct {
@@ -15,6 +18,7 @@ type Config struct {
 	DefaultProfile DefaultProfileBase `yaml:"default_profile"`
 	UpdateRepo     *bool              `yaml:"update_repo"`
 	UpdateDotbot   *bool              `yaml:"update_dotbot"`
+	ShowTotalTime  *bool              `yaml:"show_total_time"`
 	StripPath      StripPathBase      `yaml:"strip_path"`
 	Vars           map[string]interface{}
 }
@@ -130,7 +134,16 @@ func (c Config) RunAll(useBasic ...bool) bool {
 		}
 	}
 
-	c.Config.RunAll()
+	if useBasic == nil && (c.ShowTotalTime == nil || *c.ShowTotalTime == true) {
+		start := time.Now()
+		c.Config.RunAll()
+		fmt.Print(
+			emerald.ColorCode("cyan+d"), "[", utils.FormatDuration(time.Since(start)), "]", emerald.Reset, "\n",
+		)
+	} else {
+		c.Config.RunAll()
+	}
+
 	return false
 }
 

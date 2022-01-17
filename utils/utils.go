@@ -11,6 +11,7 @@ import (
 	"runtime"
 	"strconv"
 	"strings"
+	"time"
 )
 
 func ExpandUser(path string) string {
@@ -148,4 +149,12 @@ func ExecutablePath() string {
 		log.Panicln("failed to get dotbot absolute path", err)
 	}
 	return path
+}
+
+func FormatDuration(d time.Duration) string {
+	scale := 100 * time.Second
+	for scale > d {
+		scale = scale / 10
+	}
+	return d.Round(scale / 100).String()
 }
