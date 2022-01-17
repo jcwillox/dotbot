@@ -5,6 +5,7 @@ import (
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/utils"
+	"github.com/jcwillox/dotbot/utils/sudo"
 	"github.com/jcwillox/dotbot/yamltools"
 	"github.com/jcwillox/emerald"
 	"gopkg.in/yaml.v3"
@@ -49,18 +50,33 @@ func (b CleanBase) Enabled() bool {
 
 func (b CleanBase) RunAll() error {
 	paths := make([]string, len(b))
+	cleaned := false
 	for i, config := range b {
 		paths[i] = emerald.HighlightPath(config.Path, os.ModeDir)
-		err := config.Run()
+		cleaned_, err := config.Run()
+		if sudo.IsPermission(err) && sudo.WouldSudo() {
+			if !sudo.HasUsedSudo {
+				linkLogger.TagSudo("cleaning", true).Println(paths[i])
+			}
+			err = sudo.Config("clean", &config)
+		}
 		if err != nil {
-			fmt.Println("ERROR:", err)
+			fmt.Println("error:", err)
+		}
+		if cleaned_ == true {
+			cleaned = true
 		}
 	}
-	cleanLogger.Tag("cleaned").Println(strings.Join(paths, emerald.LightBlack+", "+emerald.Reset))
+	if cleaned {
+		cleanLogger.Tag("cleaned").Println(strings.Join(paths, emerald.LightBlack+", "+emerald.Reset))
+	} else {
+		cleanLogger.TagDone("cleaned").Println(strings.Join(paths, emerald.LightBlack+", "+emerald.Reset))
+	}
 	return nil
 }
 
-func (c CleanConfig) Run() error {
+func (c CleanConfig) Run() (bool, error) {
+	cleaned := false
 	path := utils.ExpandUser(c.Path)
 	err := filepath.WalkDir(path, func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
@@ -88,18 +104,22 @@ func (c CleanConfig) Run() error {
 		pathStat, _ := entry.Info()
 		// check dead link
 		if stat, err := os.Stat(dest); err != nil {
-			cleanLogger.Tag("removing").Path(
+			cleaned = true
+			if !store.DryRun {
+				err := os.Remove(path)
+				if err != nil {
+					return err
+				}
+			}
+			cleanLogger.TagC(emerald.Red, "deleted").Path(
 				emerald.HighlightPathStat(utils.ShrinkUser(path), pathStat),
 				emerald.HighlightPathStat(dest, stat),
 			)
-			if !store.DryRun {
-				return os.Remove(path)
-			}
 		}
 		return nil
 	})
 	if os.IsNotExist(err) {
-		return nil
+		return cleaned, nil
 	}
-	return err
+	return cleaned, err
 }
