@@ -14,6 +14,7 @@ import (
 	"github.com/vbauerster/mpb/v7/decor"
 	"gopkg.in/yaml.v3"
 	"io"
+	"mime"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -103,8 +104,14 @@ func (c *DownloadConfig) Run() error {
 	c.Url = head.Request.URL.String()
 	log.Debugf("downloading: '%s' length=%d\n", c.Url, head.ContentLength)
 
-	// grab filename from url
-	name := filepath.Base(c.Url)
+	// extract filename
+	_, params, err := mime.ParseMediaType(head.Header.Get("Content-Disposition"))
+	name := params["filename"]
+	if name == "" {
+		name = filepath.Base(head.Request.URL.Path)
+	}
+	log.Debugf("filename: '%s'\n", name)
+
 	if c.Path == "" {
 		// use proper download file does not exist
 		path := filepath.Join(os.TempDir(), name)
@@ -130,7 +137,7 @@ func (c *DownloadConfig) Run() error {
 			if stat, err := os.Stat(path); err == nil {
 				if stat.IsDir() {
 					// path is existing directory, append remote name to path
-					path = filepath.Join(path, filepath.Base(c.Url))
+					path = filepath.Join(path, name)
 				} else if !c.Force {
 					// skip as file is already present and force is not set
 					return nil
