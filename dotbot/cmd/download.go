@@ -19,7 +19,7 @@ var dwFlags struct {
 
 var downloadCmd = &cobra.Command{
 	Use:   "download [<url>...]",
-	Short: "",
+	Short: "Download files using the built-in downloader",
 	Run: func(cmd *cobra.Command, args []string) {
 		var mode utils.WeakFileMode = 0666
 		if dwFlags.Executable {

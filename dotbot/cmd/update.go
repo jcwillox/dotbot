@@ -7,7 +7,7 @@ import (
 
 var updateCmd = &cobra.Command{
 	Use:   "update",
-	Short: "updates dotbot and dotfiles repo if possible",
+	Short: "Updates dotbot and dotfiles repo if possible",
 	Run: func(cmd *cobra.Command, args []string) {
 		plugins.UpdaterUpdate()
 		_, _ = plugins.UpdaterUpdateRepo()

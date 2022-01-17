@@ -20,7 +20,7 @@ var (
 // rootCmd represents the base command when called without any subcommands
 var rootCmd = &cobra.Command{
 	Use:     "dotbot",
-	Short:   "",
+	Short:   "A powerful bootstrapping utility for your dotfiles and system",
 	Version: store.Version,
 	Run: func(cmd *cobra.Command, args []string) {
 		err := utils.ChBaseDir()

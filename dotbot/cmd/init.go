@@ -14,7 +14,7 @@ var apply = false
 
 var initCmd = &cobra.Command{
 	Use:   "init <owner>[/<repo>]",
-	Short: "clone and setup a dotbot dotfiles repo",
+	Short: "Clone and setup a dotbot dotfiles repo",
 	Args:  cobra.MinimumNArgs(1),
 	Run: func(cmd *cobra.Command, args []string) {
 		repo := args[0]

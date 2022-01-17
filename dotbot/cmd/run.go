@@ -19,7 +19,7 @@ var (
 
 var runCmd = &cobra.Command{
 	Use:       "run [<directive>] [<key=value...>]",
-	Short:     "execute individual dotbot configs/directives",
+	Short:     "Execute individual dotbot configs or directives",
 	ValidArgs: []string{"template"},
 	Run: func(cmd *cobra.Command, args []string) {
 		if len(args) > 0 {
