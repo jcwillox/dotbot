@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"github.com/jcwillox/emerald"
 	"github.com/mattn/go-colorable"
+	"golang.org/x/term"
 	"os"
+	"strings"
 )
 
 var (
@@ -75,6 +77,29 @@ func (l *Logger) TagC(color, tag string) *Logger {
 func (l *Logger) Path(path1, path2 string) *Logger {
 	emerald.Print(path1, emerald.LightBlack, " -> ", emerald.Reset, path2, "\n")
 	return l
+}
+
+func Rule(msg string) {
+	if !emerald.ColorEnabled {
+		fmt.Println("──", msg, "──")
+	} else {
+		bar := "──"
+		extra := ""
+		width, _, err := term.GetSize(int(os.Stdout.Fd()))
+		if err == nil {
+			freeSpace := width - len(msg) - 2
+			barLength := freeSpace / 2
+			if barLength > 0 {
+				extraLength := freeSpace % 2
+				bar = strings.Repeat("─", barLength)
+				extra = strings.Repeat("─", extraLength)
+			}
+		}
+		emerald.Print(
+			emerald.LightBlack, bar, emerald.Bold, emerald.Blue, " ", msg, " ",
+			emerald.Reset, emerald.LightBlack, bar, extra, emerald.Reset, "\n",
+		)
+	}
 }
 
 // Warn  - program will always continue

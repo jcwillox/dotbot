@@ -1,10 +1,9 @@
 package plugins
 
 import (
-	"bytes"
+	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/yamltools"
-	"github.com/jcwillox/emerald"
 	"gopkg.in/yaml.v3"
 )
 
@@ -33,13 +32,7 @@ func (b GroupBase) Enabled() bool {
 }
 
 func logGroup(group string) {
-	freeWidth := 60 - len(group) - 2
-	bar := string(bytes.Repeat([]byte("─"), freeWidth/2))
-	emerald.Print(
-		emerald.LightBlack, bar,
-		emerald.Bold, emerald.Green, " ", group, " ", emerald.Reset,
-		emerald.LightBlack, bar, emerald.Reset, "\n",
-	)
+	log.Rule(group)
 }
 
 func (b GroupBase) RunAll() error {
