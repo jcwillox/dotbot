@@ -6,12 +6,12 @@ package plugin
 import (
 	"fmt"
 	"github.com/jcwillox/dotbot/log"
-	"github.com/jcwillox/emerald"
 	"gopkg.in/yaml.v3"
 )
 
-type PluginBase []PluginConfig
+var pluginLogger = log.NewBasicLogger("PLUGIN")
 
+type PluginBase []PluginConfig
 type PluginConfig struct {
 }
 
@@ -33,8 +33,6 @@ func (b PluginBase) RunAll() error {
 	}
 	return nil
 }
-
-var pluginLogger = log.GetLogger(emerald.White, "PLUGIN", emerald.Blue)
 
 func (c PluginConfig) Run() error {
 	return nil
