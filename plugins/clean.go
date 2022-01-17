@@ -77,12 +77,12 @@ func (b CleanBase) RunAll() error {
 
 func (c CleanConfig) Run() (bool, error) {
 	cleaned := false
-	path := utils.ExpandUser(c.Path)
-	err := filepath.WalkDir(path, func(path string, entry os.DirEntry, err error) error {
+	absPath := utils.ExpandUser(c.Path)
+	err := filepath.WalkDir(absPath, func(path string, entry os.DirEntry, err error) error {
 		if err != nil {
 			return err
 		}
-		if c.Path == path {
+		if absPath == path {
 			return nil
 		}
 		if !c.Recursive && entry.IsDir() {
