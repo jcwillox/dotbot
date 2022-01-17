@@ -139,8 +139,9 @@ func Warnf(format string, a ...interface{}) {
 }
 
 func Warnln(a ...interface{}) {
-	Warn(a...)
-	fmt.Fprintln(Stderr)
+	warnTag()
+	fmt.Fprintln(Stderr, a...)
+	fmt.Fprint(Stderr, emerald.Reset)
 }
 
 func Error(a ...interface{}) {
@@ -156,8 +157,9 @@ func Errorf(format string, a ...interface{}) {
 }
 
 func Errorln(a ...interface{}) {
-	Error(a...)
-	fmt.Fprintln(Stderr)
+	errorTag()
+	fmt.Fprintln(Stderr, a...)
+	fmt.Fprint(Stderr, emerald.Reset)
 }
 
 func Fatal(a ...interface{}) {
@@ -176,8 +178,8 @@ func Fatalf(format string, a ...interface{}) {
 
 func Fatalln(a ...interface{}) {
 	fatalTag()
-	fmt.Fprint(Stderr, a...)
-	fmt.Fprintln(Stderr, emerald.Reset)
+	fmt.Fprintln(Stderr, a...)
+	fmt.Fprint(Stderr, emerald.Reset)
 	os.Exit(1)
 }
 

@@ -37,7 +37,7 @@ var rootCmd = &cobra.Command{
 func loadRunConfig(path string) bool {
 	config, err := plugins.ReadConfig(path)
 	if err != nil {
-		log.Fatalln("config file not found", err)
+		log.Fatalln("config file not found:", err)
 	}
 	return config.RunAll()
 }
