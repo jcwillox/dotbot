@@ -13,6 +13,8 @@ import (
 	"strings"
 )
 
+var cleanLogger = log.NewBasicLogger("CLEAN")
+
 type CleanBase []*CleanConfig
 type CleanConfig struct {
 	Path      string `yaml:",omitempty"`
@@ -54,11 +56,9 @@ func (b CleanBase) RunAll() error {
 			fmt.Println("ERROR:", err)
 		}
 	}
-	cleanLogger.Log().Tag("cleaned").Println(strings.Join(paths, emerald.LightBlack+", "+emerald.Reset))
+	cleanLogger.Tag("cleaned").Println(strings.Join(paths, emerald.LightBlack+", "+emerald.Reset))
 	return nil
 }
-
-var cleanLogger = log.GetLogger(emerald.ColorCode("red+b"), "CLEAN", emerald.Yellow)
 
 func (c CleanConfig) Run() error {
 	path := utils.ExpandUser(c.Path)
@@ -88,7 +88,10 @@ func (c CleanConfig) Run() error {
 		pathStat, _ := entry.Info()
 		// check dead link
 		if stat, err := os.Stat(dest); err != nil {
-			cleanLogger.LogPath("removing", emerald.HighlightPathStat(utils.ShrinkUser(path), pathStat), emerald.HighlightPathStat(dest, stat))
+			cleanLogger.Tag("removing").Path(
+				emerald.HighlightPathStat(utils.ShrinkUser(path), pathStat),
+				emerald.HighlightPathStat(dest, stat),
+			)
 			if !store.DryRun {
 				return os.Remove(path)
 			}

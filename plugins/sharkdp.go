@@ -11,7 +11,6 @@ import (
 )
 
 type SharkdpBase []SharkdpConfig
-
 type SharkdpConfig string
 
 func (b *SharkdpBase) UnmarshalYAML(n *yaml.Node) error {

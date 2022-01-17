@@ -10,8 +10,9 @@ import (
 	"strings"
 )
 
-type ProfilesBase []ProfileConfig
+var profileLogger = log.NewBasicLogger("PROFILE")
 
+type ProfilesBase []ProfileConfig
 type ProfileConfig struct {
 	Name   string
 	Groups FlatList
@@ -83,10 +84,8 @@ func (b DefaultProfileBase) GetDefaultProfile() string {
 	return ""
 }
 
-var profileLogger = log.GetLogger(emerald.ColorCode("magenta+b"), "PROFILE", emerald.Red)
-
 func LogProfile(name string) {
-	profileLogger.Log().Print(
+	profileLogger.Print(
 		emerald.Red, name, emerald.Reset, "; ", emerald.Cyan,
 		strings.Join(store.Groups, emerald.White+", "+emerald.Cyan), "\n",
 	)

@@ -14,18 +14,19 @@ import (
 	"os"
 )
 
+var createLogger = log.NewBasicLogger("CREATE")
+
 type CreateBase []*CreateConfig
+type CreateConfig struct {
+	Path string             `yaml:",omitempty"`
+	Mode utils.WeakFileMode `default:"511"`
+}
 
 func (b *CreateBase) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.MapToSliceMap(n)
 	n = yamltools.EnsureList(n)
 	type CreateBaseT CreateBase
 	return n.Decode((*CreateBaseT)(b))
-}
-
-type CreateConfig struct {
-	Path string             `yaml:",omitempty"`
-	Mode utils.WeakFileMode `default:"511"`
 }
 
 func (c *CreateConfig) UnmarshalYAML(n *yaml.Node) error {
@@ -62,8 +63,9 @@ func (b CreateBase) RunAll() error {
 		if sudo.IsPermission(err) && sudo.WouldSudo() {
 			if !sudo.HasUsedSudo {
 				// let user know why we want to sudo
-				createLogger.Log().TagC(emerald.Yellow, "creating").Sudo(true).Print(
-					emerald.HighlightFileMode(os.FileMode(config.Mode)), " ", emerald.HighlightPath(config.Path, os.ModeDir), "\n",
+				createLogger.TagSudo("creating", true).Print(
+					emerald.HighlightFileMode(os.FileMode(config.Mode)), " ",
+					emerald.HighlightPath(config.Path, os.ModeDir), "\n",
 				)
 			}
 			err = sudo.Config("create", &config)
@@ -80,8 +82,6 @@ func (b CreateBase) RunAll() error {
 	return nil
 }
 
-var createLogger = log.GetLogger(emerald.ColorCode("green+b"), "CREATE", emerald.Yellow)
-
 func (c CreateConfig) Run() error {
 	path := utils.ExpandUser(c.Path)
 	_, err := os.Stat(path)
@@ -92,13 +92,13 @@ func (c CreateConfig) Run() error {
 				return err
 			}
 		}
-		createLogger.Log().TagC(emerald.Yellow, "created").Sudo().Print(
-			emerald.HighlightFileMode(os.FileMode(c.Mode)), " ", emerald.HighlightPath(c.Path, os.ModeDir),
-		).Println()
+		createLogger.TagSudo("created").Print(
+			emerald.HighlightFileMode(os.FileMode(c.Mode)), " ", emerald.HighlightPath(c.Path, os.ModeDir), "\n",
+		)
 	} else if err != nil {
 		return err
 	} else {
-		createLogger.LogTagC(emerald.LightBlack, "exists", emerald.HighlightPath(c.Path, os.ModeDir))
+		createLogger.TagDone("exists").Println(emerald.HighlightPath(c.Path, os.ModeDir))
 	}
 	return nil
 }

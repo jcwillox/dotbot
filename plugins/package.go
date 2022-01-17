@@ -12,6 +12,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var packageLogger = log.NewBasicLogger("PACKAGE")
+
 type PackageBase []PackageConfig
 type PackageConfig []*PackageItem
 type PackageItem struct {
@@ -58,8 +60,6 @@ func (b PackageBase) RunAll() error {
 	}
 	return nil
 }
-
-var packageLogger = log.GetLogger(emerald.ColorCode("blue+b"), "PACKAGE", emerald.Yellow)
 
 func (p PackageConfig) Run() error {
 	for _, c := range p {
@@ -119,15 +119,15 @@ var highlightVersion = emerald.ColorFunc("cyan+u")
 
 func logPackage(pkg string, version string, latest string) {
 	if version == "" && latest == "" {
-		packageLogger.Log().TagC(emerald.Red, "invalid").Print(emerald.Green, pkg, "\n")
+		packageLogger.TagC(emerald.Red, "invalid").Print(emerald.Green, pkg, "\n")
 	} else if version == latest {
-		packageLogger.Log().TagC(emerald.LightBlack, "up-to-date").Print(
+		packageLogger.TagDone("up-to-date").Print(
 			emerald.Green, pkg, " ", emerald.Blue, version, "\n",
 		)
 	} else if version == "" {
-		packageLogger.Log().Tag("installing").Print(emerald.Green, pkg, " ", highlightVersion(latest), "\n")
+		packageLogger.TagSudo("installing", true).Print(emerald.Green, pkg, " ", highlightVersion(latest), "\n")
 	} else {
-		packageLogger.Log().Tag("updating").Print(
+		packageLogger.TagSudo("updating", true).Print(
 			emerald.Green, pkg, emerald.Reset, " ", emerald.Blue, version,
 			emerald.LightBlack, " -> ", highlightVersion(latest), "\n",
 		)

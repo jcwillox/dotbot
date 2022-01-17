@@ -15,20 +15,21 @@ import (
 	"path/filepath"
 )
 
+var linkLogger = log.NewBasicLogger("LINK")
+
 type LinkBase []*LinkConfig
+type LinkConfig struct {
+	Path   string `yaml:",omitempty"`
+	Source string
+	Mkdirs bool `default:"true"`
+	Force  bool
+}
 
 func (b *LinkBase) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.EnsureFlatList(n)
 	n = yamltools.MapToSliceMap(n)
 	type LinkBaseT LinkBase
 	return n.Decode((*LinkBaseT)(b))
-}
-
-type LinkConfig struct {
-	Path   string `yaml:",omitempty"`
-	Source string
-	Mkdirs bool `default:"true"`
-	Force  bool
 }
 
 func (c *LinkConfig) UnmarshalYAML(n *yaml.Node) error {
@@ -59,7 +60,7 @@ func (b LinkBase) RunAll() error {
 		if sudo.IsPermission(err) && sudo.WouldSudo() {
 			absSource, _ := filepath.Abs(config.Source)
 			if !sudo.HasUsedSudo {
-				linkLogger.Log().Tag("linking").Sudo(true).Path(
+				linkLogger.TagSudo("linking", true).Path(
 					emerald.HighlightPath(config.Path, os.ModeSymlink),
 					emerald.HighlightPathStat(absSource),
 				)
@@ -72,8 +73,6 @@ func (b LinkBase) RunAll() error {
 	}
 	return nil
 }
-
-var linkLogger = log.GetLogger(emerald.ColorCode("cyan+b"), "LINK", emerald.Yellow)
 
 func (c LinkConfig) Run() error {
 	sourceStat, err := os.Lstat(c.Source)
@@ -102,9 +101,7 @@ func (c LinkConfig) Run() error {
 			// check link is already to correct dest
 			if os.SameFile(destStat, sourceStat) {
 				// link is correct
-				linkLogger.LogPathC(
-					emerald.LightBlack,
-					"valid",
+				linkLogger.TagDone("linked").Path(
 					emerald.HighlightPathStat(c.Path, pathStat),
 					emerald.HighlightPathStat(dest, destStat),
 				)
@@ -119,7 +116,7 @@ func (c LinkConfig) Run() error {
 			if err != nil {
 				return err
 			}
-			linkLogger.Log().TagC(emerald.Red, "deleted").Println(emerald.HighlightPathStat(c.Path, pathStat))
+			linkLogger.TagC(emerald.Red, "deleted").Println(emerald.HighlightPathStat(c.Path, pathStat))
 		} else {
 			return errors.New("failed to create link as target already exists")
 		}
@@ -146,7 +143,7 @@ func (c LinkConfig) Run() error {
 		}
 	}
 
-	linkLogger.Log().Tag("linked").Sudo().Path(
+	linkLogger.TagSudo("linked").Path(
 		emerald.HighlightPath(c.Path, os.ModeSymlink),
 		emerald.HighlightPathStat(absSource, sourceStat),
 	)

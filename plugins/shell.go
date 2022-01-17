@@ -12,6 +12,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var shellLogger = log.NewBasicLogger("SHELL")
+
 type ShellBase []*ShellConfig
 type ShellConfig struct {
 	Desc    string
@@ -45,24 +47,18 @@ func (b ShellBase) RunAll() error {
 	return nil
 }
 
-var shellLogger = log.GetLogger(emerald.ColorCode("magenta+b"), "SHELL", emerald.LightBlack)
-
 func (c ShellConfig) Run() error {
 	err := template.RenderField(&c.Command.Command)
 	if err != nil {
 		return err
 	}
-	logSudo := func() {
-		shellLogger.Sudo((c.Command.Sudo || c.Command.TrySudo) && sudo.WouldSudo())
-	}
+	willSudo := (c.Command.Sudo || c.Command.TrySudo) && sudo.WouldSudo()
 	if c.Desc == "" {
-		shellLogger.Log().Print(emerald.Blue, c.Command.ShortString(), " ")
-		logSudo()
-		shellLogger.Println()
+		shellLogger.TagSudo("running", willSudo).Print(emerald.LightBlue, c.Command.ShortString(), "\n")
 	} else {
-		shellLogger.Log().Print(emerald.Blue, c.Desc, " ")
-		logSudo()
-		shellLogger.Print(emerald.LightBlack, "'", c.Command.ShortString(), "'\n")
+		shellLogger.TagSudo("running", willSudo).Print(
+			emerald.LightBlue, c.Desc, " ", emerald.LightBlack, "'", c.Command.ShortString(), "'\n",
+		)
 	}
 	cmd, err := c.Command.Cmd()
 	if err != nil {

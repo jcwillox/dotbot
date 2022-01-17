@@ -17,6 +17,8 @@ import (
 	"strings"
 )
 
+var installLogger = log.NewBasicLogger("INSTALL")
+
 type InstallBase []InstallConfig
 type InstallConfig struct {
 	Name     string
@@ -48,19 +50,17 @@ func (b InstallBase) RunAll() error {
 	return nil
 }
 
-var installLogger = log.GetLogger(emerald.ColorCode("blue+b"), "INSTALL", emerald.Yellow)
-
 func logInstall(title string, version string, latest string) {
 	if version == "" && latest == "" {
-		installLogger.Log().TagC(emerald.Red, "invalid").Print(emerald.Green, title, "\n")
+		installLogger.TagC(emerald.Red, "invalid").Print(emerald.Green, title, "\n")
 	} else if version == latest {
-		installLogger.Log().TagC(emerald.LightBlack, "up-to-date").Print(
+		installLogger.TagDone("up-to-date").Print(
 			emerald.Green, title, " ", emerald.Blue, version, "\n",
 		)
 	} else if version == "" {
-		installLogger.Log().Tag("installing").Print(emerald.Green, title, " ", highlightVersion(latest), "\n")
+		installLogger.Tag("installing").Print(emerald.Green, title, " ", highlightVersion(latest), "\n")
 	} else {
-		installLogger.Log().Tag("updating").Print(
+		installLogger.Tag("updating").Print(
 			emerald.Green, title, emerald.Reset, " ", emerald.Blue, version,
 			emerald.LightBlack, " -> ", highlightVersion(latest), "\n",
 		)

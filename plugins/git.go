@@ -16,6 +16,8 @@ import (
 	"path/filepath"
 )
 
+var gitLogger = log.NewBasicLogger("GIT")
+
 type GitBase []*GitConfig
 
 type GitConfig struct {
@@ -65,8 +67,6 @@ func (b GitBase) RunAll() error {
 	return nil
 }
 
-var gitLogger = log.GetLogger(emerald.ColorCode("yellow+b"), "GIT", emerald.Yellow)
-
 func (c GitConfig) Run() error {
 	path := utils.ExpandUser(c.Path)
 	_, err := git.PlainOpen(path)
@@ -78,34 +78,30 @@ func (c GitConfig) Run() error {
 	// check if we can write to the parent directory
 	sudo := !utils.IsWritable(filepath.Dir(path))
 
-	logTail := func() {
-		gitLogger.Sudo(sudo).Print(emerald.Blue, c.String(), "\n")
+	logAction := func(tag string) {
+		gitLogger.TagSudo(tag).Print(emerald.LightBlue, c, "\n")
 	}
 
 	switch c.Method {
 	case "clone_pull":
 		if isNotExists {
-			gitLogger.Log().Tag("cloning")
-			logTail()
+			logAction("cloning")
 			return c.clonePath(path, sudo)
 		}
-		gitLogger.Log().Tag("pulling")
-		logTail()
+		logAction("pulling")
 		return c.pullPath(path, sudo)
 	case "clone":
 		if isNotExists {
-			gitLogger.Log().Tag("cloning")
-			logTail()
+			logAction("cloning")
 			return c.clonePath(path, sudo)
 		} else {
-			gitLogger.LogTagC(emerald.LightBlack, "cloned", emerald.Blue, c)
+			gitLogger.TagDone("cloned").Print(emerald.LightBlue, c, "\n")
 		}
 	case "pull":
 		if isNotExists {
 			return err
 		}
-		gitLogger.Log().Tag("pulling")
-		logTail()
+		logAction("pulling")
 		return c.pullPath(path, sudo)
 	}
 	return nil
@@ -171,7 +167,7 @@ func (c GitConfig) pullPath(path string, sudo bool) error {
 			if emerald.ColorEnabled {
 				emerald.Print("\x1b[F\x1b[K")
 			}
-			gitLogger.LogTagC(emerald.LightBlack, "up-to-date", emerald.Blue, c)
+			gitLogger.TagDone("up-to-date").Print(emerald.LightBlue, c, "\n")
 		} else {
 			emerald.Print(out)
 		}

@@ -8,21 +8,21 @@ import (
 )
 
 var (
-	Stderr = colorable.NewColorableStdout()
+	Stderr    = colorable.NewColorableStdout()
+	ColorSudo = emerald.LightMagenta
+	ColorNew  = emerald.LightYellow
+	ColorDone = emerald.LightBlack
 )
 
-func GetLogger(color string, name string, tagColor string) Logger {
-	return Logger{
-		name:     name,
-		color:    color,
-		tagColor: tagColor,
+func NewBasicLogger(name string) *Logger {
+	return &Logger{
+		name: name,
 	}
 }
 
 type Logger struct {
 	name     string
-	color    string
-	tagColor string
+	ShowTime bool
 }
 
 func (l *Logger) tag(tag string, color string) *Logger {
@@ -31,14 +31,6 @@ func (l *Logger) tag(tag string, color string) *Logger {
 	}
 	emerald.Print(color, "[", tag, "] ", emerald.Reset)
 	return l
-}
-
-func (l Logger) directive() {
-	emerald.Print("[")
-	if emerald.ColorEnabled {
-		emerald.Print(l.color)
-	}
-	emerald.Print(l.name, emerald.Reset, "] ")
 }
 
 func (l *Logger) Print(a ...interface{}) *Logger {
@@ -60,61 +52,29 @@ func (l *Logger) Println(a ...interface{}) *Logger {
 }
 
 func (l *Logger) Tag(tag string) *Logger {
-	return l.tag(tag, l.tagColor)
+	return l.tag(tag, ColorNew)
+}
+
+func (l *Logger) TagDone(tag string) *Logger {
+	return l.tag(tag, ColorDone)
+}
+
+func (l *Logger) TagSudo(tag string, sudo ...bool) *Logger {
+	if len(sudo) > 0 && sudo[0] {
+		return l.tag(tag, ColorSudo)
+	} else if _, present := os.LookupEnv("DOTBOT_SUDO"); present {
+		return l.tag(tag, ColorSudo)
+	}
+	return l.tag(tag, ColorNew)
 }
 
 func (l *Logger) TagC(color, tag string) *Logger {
 	return l.tag(tag, color)
 }
 
-func (l *Logger) Sudo(sudo ...bool) *Logger {
-	return l.SudoC(emerald.Magenta, sudo...)
-}
-
-func (l *Logger) SudoC(color string, sudo ...bool) *Logger {
-	if len(sudo) > 0 && sudo[0] {
-		return l.tag("sudo", color)
-	} else if _, present := os.LookupEnv("DOTBOT_SUDO"); present {
-		return l.tag("sudo", color)
-	}
-	return l
-}
-
 func (l *Logger) Path(path1, path2 string) *Logger {
 	emerald.Print(path1, emerald.LightBlack, " -> ", emerald.Reset, path2, "\n")
 	return l
-}
-
-func (l *Logger) Log() *Logger {
-	l.directive()
-	return l
-}
-
-// LogTag [<color><tag>] <grey><tag> <msg>
-func (l Logger) LogTag(tag string, a ...interface{}) {
-	l.directive()
-	l.tag(tag, l.tagColor)
-	emerald.Print(a...)
-	emerald.Println(emerald.Reset)
-}
-
-func (l Logger) LogTagC(color string, tag string, a ...interface{}) {
-	l.directive()
-	l.tag(tag, color)
-	emerald.Print(a...)
-	emerald.Println(emerald.Reset)
-}
-
-func (l Logger) LogPath(tag string, path1 string, path2 string) {
-	l.directive()
-	l.tag(tag, l.tagColor)
-	emerald.Print(path1, emerald.LightBlack, " -> ", emerald.Reset, path2, "\n")
-}
-
-func (l Logger) LogPathC(color string, tag string, path1 string, path2 string) {
-	l.directive()
-	l.tag(tag, color)
-	emerald.Print(path1, emerald.LightBlack, " -> ", emerald.Reset, path2, "\n")
 }
 
 // Warn  - program will always continue

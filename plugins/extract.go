@@ -20,6 +20,8 @@ import (
 	"strings"
 )
 
+var extractLogger = log.NewBasicLogger("EXTRACT")
+
 type ExtractBase []*ExtractConfig
 type ExtractConfig struct {
 	Archive string
@@ -83,8 +85,6 @@ func (b ExtractBase) RunAll() error {
 	return nil
 }
 
-var extractLogger = log.GetLogger(emerald.White, "EXTRACT", emerald.Yellow)
-
 func (c ExtractConfig) Run() error {
 	archive := utils.ExpandUser(c.Archive)
 	f, err := archiver.ByExtension(archive)
@@ -130,9 +130,10 @@ func (c ExtractConfig) Run() error {
 
 				err := extractFile(f, dest)
 				if err != nil {
-					extractLogger.Log().Path(emerald.HighlightPath(hName, f.Mode()), emerald.HighlightPathStat(dest, nil))
+					extractLogger.TagC(emerald.Red, "failed").Path(emerald.HighlightPath(hName, f.Mode()), emerald.HighlightPathStat(dest, nil))
 					return err
 				}
+				emerald.Print("[", emerald.Green, "+", emerald.Reset, "] ", emerald.HighlightPath(hName, f.Mode()), "\n")
 			}
 		}
 		return nil
@@ -140,7 +141,6 @@ func (c ExtractConfig) Run() error {
 	if err != nil {
 		return err
 	}
-	extractLogger.Log().Tag("extracted").Println(emerald.HighlightPathStat(archive))
 	return nil
 }
 

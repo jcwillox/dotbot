@@ -21,6 +21,8 @@ import (
 	"time"
 )
 
+var downloadLogger = log.NewBasicLogger("DOWNLOAD")
+
 type DownloadBase []*DownloadConfig
 type DownloadConfig struct {
 	Name    string
@@ -62,8 +64,9 @@ func (b DownloadBase) RunAll() error {
 		if sudo.IsPermission(err) && sudo.WouldSudo() {
 			if !sudo.HasUsedSudo {
 				// let user know why we want to sudo
-				downloadLogger.Log().TagC(emerald.Yellow, "downloading").Sudo(true).Print(
-					emerald.HighlightFileMode(os.FileMode(config.Mode)), " ", emerald.HighlightPath(config.Path, os.FileMode(config.Mode)), "\n",
+				downloadLogger.TagSudo("downloading", true).Print(
+					emerald.HighlightFileMode(os.FileMode(config.Mode)), " ",
+					emerald.HighlightPath(config.Path, os.FileMode(config.Mode)), "\n",
 				)
 			}
 			err = sudo.Config("download", &config)
@@ -75,8 +78,6 @@ func (b DownloadBase) RunAll() error {
 	}
 	return nil
 }
-
-var downloadLogger = log.GetLogger(emerald.ColorCode("blue+b"), "DOWNLOAD", emerald.Yellow)
 
 func (c *DownloadConfig) Run() error {
 	var f *os.File
