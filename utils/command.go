@@ -3,6 +3,7 @@ package utils
 import (
 	"errors"
 	"github.com/google/shlex"
+	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/utils/sudo"
 	"golang.org/x/sys/execabs"
 	"os"
@@ -23,6 +24,8 @@ type Command struct {
 	Sudo bool
 	// Attempt to run command as root
 	TrySudo bool `yaml:"try_sudo"`
+	// Use fixed number of lines for output
+	MaxLines int `yaml:"max_lines"`
 }
 
 func (c Command) Run() error {
@@ -65,6 +68,9 @@ func (c Command) Cmd() (*execabs.Cmd, error) {
 	}
 	if c.Stdout {
 		cmd.Stdout = os.Stdout
+	}
+	if c.MaxLines > 0 {
+		cmd.Stdout = log.NewMaxLineWriter(c.MaxLines)
 	}
 	if c.Stderr {
 		cmd.Stderr = os.Stderr

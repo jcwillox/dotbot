@@ -84,11 +84,12 @@ func (c PackageItem) InstallAll() error {
 				break
 			}
 			command = &utils.Command{
-				Command: "apt-get install -qq -y " + pkg,
-				Shell:   false,
-				Stdout:  false,
-				Stderr:  true,
-				Sudo:    true,
+				Command:  "apt-get install -qq -y " + pkg,
+				Shell:    false,
+				Stdout:   false,
+				Stderr:   true,
+				Sudo:     true,
+				MaxLines: 10,
 			}
 
 		}
@@ -100,11 +101,12 @@ func (c PackageItem) InstallAll() error {
 				break
 			}
 			command = &utils.Command{
-				Command: "apk add " + pkg,
-				Shell:   false,
-				Stdout:  true,
-				Stderr:  true,
-				Sudo:    true,
+				Command:  "apk add " + pkg,
+				Shell:    false,
+				Stdout:   true,
+				Stderr:   true,
+				Sudo:     true,
+				MaxLines: 10,
 			}
 		}
 	}
@@ -115,8 +117,6 @@ func (c PackageItem) InstallAll() error {
 	if err != nil {
 		return err
 	}
-	writer := log.NewMaxLineWriter()
-	cmd.Stdout = writer
 	return cmd.Run()
 }
 
