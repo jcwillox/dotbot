@@ -8,6 +8,10 @@ This project has a much stronger focus on supporting "profiles" and "groups" all
 
 Dotbot can even be used as a lightweight package manager installing the latest versions of your core utilities irrespective of what package managers or packages are available on your OS.
 
+## Showcase
+
+[![asciicast](https://asciinema.org/a/462686.svg)](https://asciinema.org/a/462686)
+
 ## Installation
 
 ```bash
