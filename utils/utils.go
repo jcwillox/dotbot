@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
+	"github.com/shirou/gopsutil/host"
 	"golang.org/x/sys/execabs"
 	"os"
 	"path/filepath"
@@ -109,6 +110,13 @@ func IsMusl() bool {
 	}
 }
 
+func GetLibc() string {
+	if IsMusl() {
+		return "musl"
+	}
+	return "gnu"
+}
+
 func isLibcMusl() (bool, error) {
 	// perform quick file checks
 	if _, err := os.Stat("/lib/ld-musl-x86_64.so.1"); err == nil {
@@ -157,4 +165,15 @@ func FormatDuration(d time.Duration) string {
 		scale = scale / 10
 	}
 	return d.Round(scale / 100).String()
+}
+
+var platform string
+var family string
+
+func GetPlatformInfo() (string, string) {
+	if platform != "" {
+		return platform, family
+	}
+	platform, family, _, _ = host.PlatformInformation()
+	return platform, family
 }

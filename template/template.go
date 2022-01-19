@@ -21,18 +21,13 @@ var funcs = map[string]interface{}{
 	"DefaultShell": utils.DefaultShell,
 	"IsWSL":        utils.IsWSL,
 	"IsMusl":       utils.IsMusl,
+	"LIBC":         utils.GetLibc,
 	"IsRoot":       sudo.IsRoot,
 	"CanSudo":      sudo.CanSudo,
 	"OnPath":       utils.OnPath,
 	"Which": func(file string) string {
 		path, _ := execabs.LookPath(file)
 		return path
-	},
-	"LIBC": func() string {
-		if utils.IsMusl() {
-			return "musl"
-		}
-		return "gnu"
 	},
 }
 

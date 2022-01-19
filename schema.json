@@ -51,6 +51,9 @@
         },
         {
           "$ref": "#/$defs/if"
+        },
+        {
+          "$ref": "#/$defs/system"
         }
       ]
     },
@@ -651,6 +654,66 @@
           "$ref": "#/$defs/plugin-list"
         },
         "else": {
+          "$ref": "#/$defs/plugin-list"
+        }
+      }
+    },
+    "system": {
+      "type": "object",
+      "required": [
+        "system"
+      ],
+      "properties": {
+        "system": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/system-config"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/system-config"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "system-config": {
+      "type": "object",
+      "properties": {
+        "os": {
+          "type": "string",
+          "enum": ["windows", "linux", "darwin", "freebsd", "openbsd", "netbsd", "plan9", "solaris", "android"]
+        },
+        "arch": {
+          "type": "string",
+          "enum": ["amd64", "386", "arm64", "arm"]
+        },
+        "platform": {
+          "type": "string"
+        },
+        "family": {
+          "type": "string",
+          "description": "Group the distro belongs to e.g. ubuntu is part of the debian family"
+        },
+        "libc": {
+          "type": "string",
+          "enum": ["gnu", "musl"]
+        },
+        "distro": {
+          "type": "string",
+          "description": "The distro name e.g. kali"
+        },
+        "is_root": {
+          "type": "boolean"
+        },
+        "can_sudo": {
+          "type": "boolean",
+          "description": "True if the user is allowed to use the sudo command"
+        },
+        "then": {
           "$ref": "#/$defs/plugin-list"
         }
       }
