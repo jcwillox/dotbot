@@ -94,6 +94,7 @@ func UpdaterUpdate() {
 
 	// restart program
 	if runtime.GOOS == "windows" {
+		_ = os.Setenv("DOTBOT_UPDATED", "1")
 		cmd := exec.Command(exe, os.Args[1:]...)
 		cmd.Stdin = os.Stdin
 		cmd.Stdout = os.Stdout
@@ -123,6 +124,11 @@ func UpdaterUpdateRepo() (bool, error) {
 
 func UpdaterCleanup() {
 	if runtime.GOOS != "windows" {
+		return
+	}
+	if os.Getenv("DOTBOT_UPDATED") == "1" {
+		// we won't be able to delete the file if we just updated as the original
+		// process is still running
 		return
 	}
 	exe := utils.ExecutablePath()
