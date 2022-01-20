@@ -123,7 +123,7 @@ func (c GitConfig) clonePath(path string, sudo bool) error {
 		flags = "--depth=1"
 	}
 	cmd, err := utils.Command{
-		Command: fmt.Sprintln("git clone", flags, c.Url, path),
+		Command: fmt.Sprintf("git clone %s '%s' '%s'", flags, c.Url, path),
 		Shell:   false,
 		Stdout:  true,
 		Stderr:  true,
@@ -143,7 +143,7 @@ func (c GitConfig) pullPath(path string, sudo bool) error {
 		return nil
 	}
 	cmd, err := utils.Command{
-		Command: fmt.Sprintf("git -c color.ui=always -C %s pull --progress", path),
+		Command: fmt.Sprintf("git -c color.ui=always -C '%s' pull --progress", path),
 		Shell:   false,
 		Stderr:  true,
 		Sudo:    sudo,
