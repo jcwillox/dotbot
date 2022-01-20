@@ -6,10 +6,9 @@ require (
 	github.com/creasty/defaults v1.5.2
 	github.com/go-git/go-git/v5 v5.3.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
-	github.com/jcwillox/emerald v0.3.1
+	github.com/jcwillox/emerald v0.3.2
 	github.com/k0kubun/pp/v3 v3.1.0
 	github.com/klauspost/compress v1.13.6
-	github.com/mattn/go-colorable v0.1.12
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/shirou/gopsutil v3.21.10+incompatible
 	github.com/spf13/cobra v1.3.0
@@ -36,6 +35,7 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
+	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect

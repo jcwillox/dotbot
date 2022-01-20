@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/jcwillox/emerald"
 	"github.com/k0kubun/pp/v3"
-	"github.com/mattn/go-colorable"
 	"golang.org/x/term"
 	"os"
 	"strings"
@@ -12,7 +11,7 @@ import (
 
 var (
 	EnableDebug = false
-	Stderr      = colorable.NewColorableStdout()
+	Stderr      = emerald.Stderr
 	ColorSudo   = emerald.LightMagenta
 	ColorNew    = emerald.LightYellow
 	ColorDone   = emerald.LightBlack
