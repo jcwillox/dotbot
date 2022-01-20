@@ -140,12 +140,14 @@ func (c *DownloadConfig) Run() error {
 					path = filepath.Join(path, name)
 				} else if !c.Force {
 					// skip as file is already present and force is not set
+					downloadLogger.TagDone("downloaded").Println(emerald.HighlightPathStat(path, stat))
 					return nil
 				}
 			}
 		}
-		if _, err := os.Stat(path); err == nil && !c.Force {
+		if stat, err := os.Stat(path); err == nil && !c.Force {
 			// skip as file is already present and force is not set
+			downloadLogger.TagDone("downloaded").Println(emerald.HighlightPathStat(path, stat))
 			return nil
 		}
 		if c.Mkdirs {

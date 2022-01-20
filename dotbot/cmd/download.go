@@ -15,22 +15,15 @@ import (
 var dwFlags struct {
 	Executable bool
 	Force      bool
+	Paths      []string
 }
 
 var downloadCmd = &cobra.Command{
 	Use:   "download [<url>...]",
 	Short: "Download files using the built-in downloader",
 	Run: func(cmd *cobra.Command, args []string) {
-		var mode utils.WeakFileMode = 0666
-		if dwFlags.Executable {
-			mode = 0777
-		}
-		cwd, err := os.Getwd()
-		if err != nil {
-			log.Fatalln(err)
-		}
 		if len(args) > 0 {
-			downloadFile(args[0], cwd, mode)
+			downloadFiles(args)
 		} else {
 			reader := bufio.NewReader(os.Stdin)
 			urls := make([]string, 0, 5)
@@ -49,11 +42,27 @@ var downloadCmd = &cobra.Command{
 				}
 				urls = append(urls, string(bytes.TrimSpace(line)))
 			}
-			for _, url := range urls {
-				downloadFile(url, cwd, mode)
-			}
+			downloadFiles(urls)
 		}
 	},
+}
+
+func downloadFiles(urls []string) {
+	var mode utils.WeakFileMode = 0666
+	if dwFlags.Executable {
+		mode = 0777
+	}
+	cwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln(err)
+	}
+	for i, url := range urls {
+		if i < len(dwFlags.Paths) {
+			downloadFile(url, dwFlags.Paths[i], mode)
+		} else {
+			downloadFile(url, cwd, mode)
+		}
+	}
 }
 
 func downloadFile(url string, path string, mode utils.WeakFileMode) {
@@ -74,4 +83,5 @@ func init() {
 	rootCmd.AddCommand(downloadCmd)
 	downloadCmd.Flags().BoolVarP(&dwFlags.Executable, "executable", "x", false, "make downloaded file executable")
 	downloadCmd.Flags().BoolVarP(&dwFlags.Force, "force", "f", false, "overwrite destination file if it exists")
+	downloadCmd.Flags().StringSliceVarP(&dwFlags.Paths, "output", "o", nil, "destination to download file to")
 }
