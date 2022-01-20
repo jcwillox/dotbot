@@ -7,13 +7,15 @@ require (
 	github.com/go-git/go-git/v5 v5.3.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510
 	github.com/jcwillox/emerald v0.3.1
-	github.com/k0kubun/pp/v3 v3.0.7
+	github.com/k0kubun/pp/v3 v3.1.0
 	github.com/klauspost/compress v1.13.6
+	github.com/mattn/go-colorable v0.1.12
 	github.com/mholt/archiver/v3 v3.5.1
 	github.com/shirou/gopsutil v3.21.10+incompatible
 	github.com/spf13/cobra v1.3.0
 	github.com/vbauerster/mpb/v7 v7.1.5
-	golang.org/x/sys v0.0.0-20211205182925-97ca703d548d
+	golang.org/x/sys v0.0.0-20220114195835-da31bd327af9
+	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
 	gopkg.in/yaml.v3 v3.0.0-20210107192922-496545a6307b
 )
 
@@ -34,7 +36,6 @@ require (
 	github.com/jbenet/go-context v0.0.0-20150711004518-d14ea06fba99 // indirect
 	github.com/kevinburke/ssh_config v0.0.0-20201106050909-4977a11b4351 // indirect
 	github.com/klauspost/pgzip v1.2.5 // indirect
-	github.com/mattn/go-colorable v0.1.12 // indirect
 	github.com/mattn/go-isatty v0.0.14 // indirect
 	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
@@ -50,7 +51,7 @@ require (
 	github.com/xi2/xz v0.0.0-20171230120015-48954b6210f8 // indirect
 	golang.org/x/crypto v0.0.0-20211117183948-ae814b36b871 // indirect
 	golang.org/x/net v0.0.0-20211112202133-69e39bad7dc2 // indirect
-	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211 // indirect
+	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
 
