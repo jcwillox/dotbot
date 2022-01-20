@@ -13,16 +13,18 @@ import (
 	"gopkg.in/yaml.v3"
 	"os"
 	"path/filepath"
+	"strconv"
 )
 
 var linkLogger = log.NewBasicLogger("LINK")
 
 type LinkBase []*LinkConfig
 type LinkConfig struct {
-	Path   string `yaml:",omitempty"`
-	Source string
-	Mkdirs bool `default:"true"`
-	Force  bool
+	Path      string `yaml:",omitempty"`
+	Source    string
+	Mkdirs    bool `default:"true"`
+	Force     bool
+	SafeForce bool `yaml:"safe_force"`
 }
 
 func (b *LinkBase) UnmarshalYAML(n *yaml.Node) error {
@@ -108,15 +110,35 @@ func (c LinkConfig) Run() error {
 				return nil
 			}
 		}
-		if c.Force {
+		if c.Force || c.SafeForce {
 			if !utils.IsWritable(path) {
 				return os.ErrPermission
 			}
-			err := os.Remove(path)
-			if err != nil {
-				return err
+			if c.Force {
+				err := os.Remove(path)
+				if err != nil {
+					return err
+				}
+				linkLogger.TagC(emerald.Red, "deleted").Println(emerald.HighlightPathStat(c.Path, pathStat))
+			} else {
+				for i := 1; i < 11; i++ {
+					dest := path + "." + strconv.Itoa(i)
+					if _, err := os.Lstat(dest); os.IsNotExist(err) {
+						err := os.Rename(path, dest)
+						if err != nil {
+							return err
+						}
+						linkLogger.TagC(emerald.Red, "renamed").Path(
+							emerald.HighlightPathStat(c.Path, pathStat),
+							emerald.HighlightPathStat(c.Path+"."+strconv.Itoa(i), pathStat),
+						)
+						break
+					}
+					if i == 10 {
+						return errors.New("unable to rename file: too many failed renames")
+					}
+				}
 			}
-			linkLogger.TagC(emerald.Red, "deleted").Println(emerald.HighlightPathStat(c.Path, pathStat))
 		} else {
 			return errors.New("failed to create link as target already exists")
 		}

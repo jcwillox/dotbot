@@ -148,17 +148,19 @@
           "source": {
             "type": "string"
           },
-          "force": {
-            "type": "boolean",
-            "default": false
-          },
           "mkdirs": {
             "type": "boolean",
             "default": true
           },
-          "recursive": {
+          "force": {
             "type": "boolean",
-            "default": false
+            "default": false,
+            "description": "Overwrite target file if it exists"
+          },
+          "safe_force": {
+            "type": "boolean",
+            "default": false,
+            "description": "Will rename the target file instead of overwriting it"
           }
         }
       }
