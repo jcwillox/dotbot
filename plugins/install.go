@@ -27,6 +27,7 @@ type InstallConfig struct {
 	Download *DownloadConfig
 	Shell    *ShellConfig
 	Sudo     bool
+	TrySudo  bool `yaml:"try_sudo"`
 	Then     PluginList
 }
 
@@ -100,10 +101,14 @@ func (c InstallConfig) Run() error {
 			c.Then = append(then, c.Then...)
 		}
 
-		if c.Sudo && sudo.WouldSudo() {
-			err := sudo.Configs(&c.Then)
-			if err != nil {
-				return err
+		if c.Sudo || c.TrySudo {
+			if sudo.WouldSudo() {
+				err := sudo.Configs(&c.Then)
+				if err != nil {
+					return err
+				}
+			} else if sudo.IsRoot() || c.TrySudo {
+				c.Then.RunAll()
 			}
 		} else {
 			c.Then.RunAll()
