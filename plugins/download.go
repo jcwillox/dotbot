@@ -215,8 +215,8 @@ func (c *DownloadConfig) Run() error {
 func AddProgressBar(p *mpb.Progress, total int64, desc string) *mpb.Bar {
 	if total < 0 {
 		return p.Add(total,
-			mpb.NewBarFiller(mpb.SpinnerStyle()),
-			mpb.BarWidth(1),
+			mpb.NewBarFiller(mpb.SpinnerStyle([]string{"∙∙∙", "●∙∙", "∙●∙", "∙∙●", "∙∙∙"}...)),
+			mpb.BarWidth(3),
 			mpb.BarFillerClearOnComplete(),
 			mpb.BarFillerTrim(),
 			mpb.PrependDecorators(
