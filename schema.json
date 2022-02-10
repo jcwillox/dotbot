@@ -481,6 +481,10 @@
           "type": "boolean",
           "default": false
         },
+        "try_sudo": {
+          "type": "boolean",
+          "default": false
+        },
         "download": {
           "type": "object",
           "required": [
