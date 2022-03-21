@@ -177,3 +177,12 @@ func GetPlatformInfo() (string, string) {
 	platform, family, _, _ = host.PlatformInformation()
 	return platform, family
 }
+
+func ArrContains(arr []string, s string) bool {
+	for _, s2 := range arr {
+		if s == s2 {
+			return true
+		}
+	}
+	return false
+}

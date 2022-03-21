@@ -11,12 +11,12 @@ import (
 
 type SystemBase []SystemConfig
 type SystemConfig struct {
-	OS       string
-	Arch     string
-	Platform string
-	Family   string
-	Libc     string
-	Distro   string
+	OS       FlatList
+	Arch     FlatList
+	Platform FlatList
+	Family   FlatList
+	Libc     FlatList
+	Distro   FlatList
 	IsRoot   bool `yaml:"is_root"`
 	CanSudo  bool `yaml:"can_sudo"`
 	Then     PluginList
@@ -42,25 +42,25 @@ func (b SystemBase) RunAll() error {
 }
 
 func (c SystemConfig) Run() bool {
-	if c.OS != "" && c.OS != runtime.GOOS {
+	if c.OS != nil && !utils.ArrContains(c.OS, runtime.GOOS) {
 		return false
 	}
-	if c.Arch != "" && c.Arch != runtime.GOARCH {
+	if c.Arch != nil && !utils.ArrContains(c.Arch, runtime.GOARCH) {
 		return false
 	}
-	if c.Platform != "" || c.Family != "" {
+	if c.Platform != nil || c.Family != nil {
 		platform, family := utils.GetPlatformInfo()
-		if c.Platform != "" && c.Platform != platform {
+		if c.Platform != nil && !utils.ArrContains(c.Platform, platform) {
 			return false
 		}
-		if c.Family != "" && c.Family != family {
+		if c.Family != nil && !utils.ArrContains(c.Family, family) {
 			return false
 		}
 	}
-	if c.Libc != "" && c.Libc != utils.GetLibc() {
+	if c.Libc != nil && !utils.ArrContains(c.Libc, utils.GetLibc()) {
 		return false
 	}
-	if c.Distro != "" && c.Distro != template.Distro() {
+	if c.Distro != nil && !utils.ArrContains(c.Distro, template.Distro()) {
 		return false
 	}
 	if c.IsRoot && !sudo.IsRoot() {
