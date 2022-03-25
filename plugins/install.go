@@ -85,6 +85,11 @@ func (c InstallConfig) Run() error {
 
 	current := store.Get(c.Url)
 
+	// abort early if we don't have root privileges
+	if c.Sudo && !sudo.CanSudo() {
+		return nil
+	}
+
 	logInstall(c.String(), current, version)
 	if current != version {
 		defer store.VarsClosure(map[string]interface{}{"Current": current, "Version": version, "Url": c.Url})()
