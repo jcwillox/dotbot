@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/utils"
+	"github.com/jcwillox/dotbot/utils/sudo"
 	"github.com/jcwillox/dotbot/yamltools"
 	"github.com/jcwillox/emerald"
 	"golang.org/x/sys/execabs"
@@ -48,7 +49,7 @@ func (c *PackageItem) MarshalYAML() (interface{}, error) {
 }
 
 func (b PackageBase) Enabled() bool {
-	return true
+	return sudo.CanSudo() || sudo.IsRoot()
 }
 
 func (b PackageBase) RunAll() error {

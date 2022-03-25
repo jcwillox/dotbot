@@ -152,9 +152,11 @@ func (c PluginList) RunAll() {
 	errorCount := 0
 	for _, item := range c {
 		for _, plugin := range item {
-			err := plugin.RunAll()
-			if err != nil {
-				errorCount++
+			if plugin.Enabled() {
+				err := plugin.RunAll()
+				if err != nil {
+					errorCount++
+				}
 			}
 		}
 	}
