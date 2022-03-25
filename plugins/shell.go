@@ -86,7 +86,7 @@ func (c ShellConfig) Run() error {
 		}
 		// add output to template variables after execution
 		defer func() {
-			store.Vars(map[string]interface{}{
+			store.TmplVars(map[string]interface{}{
 				"Stdout": stdout.String(),
 				"Stderr": stderr.String(),
 			})

@@ -133,7 +133,7 @@ func (c *DownloadConfig) Run() error {
 		}
 		// track temp file for deletion
 		store.TrackTempFile(f.Name())
-		store.Vars(map[string]interface{}{"Path": f.Name()})
+		store.TmplVar("Path", f.Name())
 	} else {
 		// extract filename
 		path := utils.ExpandUser(c.Path)

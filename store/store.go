@@ -127,7 +127,11 @@ func RemoveTempFiles() {
 
 var tmplVars = make(map[string]interface{})
 
-func Vars(vars map[string]interface{}) {
+func TmplVar(key string, val interface{}) {
+	tmplVars[key] = val
+}
+
+func TmplVars(vars map[string]interface{}) {
 	for key, newVal := range vars {
 		tmplVars[key] = newVal
 	}

@@ -108,7 +108,7 @@ func FromBytes(data []byte) (Config, error) {
 
 // RunAll runs all configs returns true if the config should be reloaded
 func (c Config) RunAll(useBasic ...bool) bool {
-	store.Vars(c.Vars)
+	store.TmplVars(c.Vars)
 	c.StripPath.Run()
 
 	if useBasic == nil {
