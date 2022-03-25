@@ -277,7 +277,14 @@
       "type": "object",
       "properties": {
         "desc": {
-          "type": "string"
+          "oneOf": [
+            {
+              "type": "string"
+            },
+            {
+              "const": false
+            }
+          ]
         },
         "command": {
           "type": "string"

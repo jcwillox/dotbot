@@ -56,13 +56,15 @@ func (c ShellConfig) Run() error {
 	if err != nil {
 		return err
 	}
-	willSudo := (c.Command.Sudo || c.Command.TrySudo) && sudo.WouldSudo()
-	if c.Desc == "" {
-		shellLogger.TagSudo("running", willSudo).Print(emerald.LightBlue, c.Command.ShortString(), "\n")
-	} else {
-		shellLogger.TagSudo("running", willSudo).Print(
-			emerald.LightBlue, c.Desc, " ", emerald.LightBlack, "'", c.Command.ShortString(), "'\n",
-		)
+	if c.Desc != "false" {
+		willSudo := (c.Command.Sudo || c.Command.TrySudo) && sudo.WouldSudo()
+		if c.Desc == "" {
+			shellLogger.TagSudo("running", willSudo).Print(emerald.LightBlue, c.Command.ShortString(), "\n")
+		} else {
+			shellLogger.TagSudo("running", willSudo).Print(
+				emerald.LightBlue, c.Desc, " ", emerald.LightBlack, "'", c.Command.ShortString(), "'\n",
+			)
+		}
 	}
 	cmd, err := c.Command.Cmd()
 	if err != nil || store.DryRun {
