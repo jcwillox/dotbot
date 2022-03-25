@@ -112,6 +112,10 @@ func (c *DownloadConfig) Run() error {
 	}
 	log.Debugf("filename: '%s'\n", name)
 
+	if store.DryRun {
+		return nil
+	}
+
 	if c.Path == "" {
 		// use proper download file does not exist
 		path := filepath.Join(os.TempDir(), name)

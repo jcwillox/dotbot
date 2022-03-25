@@ -115,18 +115,22 @@ func (c LinkConfig) Run() error {
 				return os.ErrPermission
 			}
 			if c.Force {
-				err := os.Remove(path)
-				if err != nil {
-					return err
+				if !store.DryRun {
+					err := os.Remove(path)
+					if err != nil {
+						return err
+					}
 				}
 				linkLogger.TagC(emerald.Red, "deleted").Println(emerald.HighlightPathStat(c.Path, pathStat))
 			} else {
 				for i := 1; i < 11; i++ {
 					dest := path + "." + strconv.Itoa(i)
 					if _, err := os.Lstat(dest); os.IsNotExist(err) {
-						err := os.Rename(path, dest)
-						if err != nil {
-							return err
+						if !store.DryRun {
+							err := os.Rename(path, dest)
+							if err != nil {
+								return err
+							}
 						}
 						linkLogger.TagC(emerald.Red, "renamed").Path(
 							emerald.HighlightPathStat(c.Path, pathStat),

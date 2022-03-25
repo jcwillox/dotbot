@@ -114,7 +114,9 @@ func (c InstallConfig) Run() error {
 			c.Then.RunAll()
 		}
 
-		store.SetSave(c.Url, version)
+		if !store.DryRun {
+			store.SetSave(c.Url, version)
+		}
 	}
 	return nil
 }

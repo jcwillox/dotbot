@@ -65,7 +65,7 @@ func (c ShellConfig) Run() error {
 		)
 	}
 	cmd, err := c.Command.Cmd()
-	if err != nil {
+	if err != nil || store.DryRun {
 		return err
 	}
 

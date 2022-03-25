@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/jcwillox/dotbot/log"
+	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/template"
 	"github.com/jcwillox/dotbot/utils"
 	"github.com/jcwillox/dotbot/yamltools"
@@ -128,11 +129,14 @@ func (c ExtractConfig) Run() error {
 					dest = path.Join(dest, stripped)
 				}
 
-				err := extractFile(f, dest)
-				if err != nil {
-					extractLogger.TagC(emerald.Red, "failed").Path(emerald.HighlightPath(hName, f.Mode()), emerald.HighlightPathStat(dest, nil))
-					return err
+				if store.DryRun {
+					err := extractFile(f, dest)
+					if err != nil {
+						extractLogger.TagC(emerald.Red, "failed").Path(emerald.HighlightPath(hName, f.Mode()), emerald.HighlightPathStat(dest, nil))
+						return err
+					}
 				}
+
 				emerald.Print("[", emerald.Green, "+", emerald.Reset, "] ", emerald.HighlightPath(hName, f.Mode()), "\n")
 			}
 		}

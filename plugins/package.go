@@ -5,6 +5,7 @@ import (
 	"bytes"
 	"fmt"
 	"github.com/jcwillox/dotbot/log"
+	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/utils"
 	"github.com/jcwillox/dotbot/utils/sudo"
 	"github.com/jcwillox/dotbot/yamltools"
@@ -81,7 +82,7 @@ func (c PackageItem) InstallAll() error {
 		for _, pkg := range c.Packages {
 			version, latest := getAptPackageVersion(pkg)
 			logPackage(pkg, version, latest)
-			if version == latest {
+			if version == latest || store.DryRun {
 				break
 			}
 			command = &utils.Command{
@@ -98,7 +99,7 @@ func (c PackageItem) InstallAll() error {
 		for _, pkg := range c.Packages {
 			version, latest := getApkPackageVersion(pkg)
 			logPackage(pkg, version, latest)
-			if version == latest {
+			if version == latest || store.DryRun {
 				break
 			}
 			command = &utils.Command{
