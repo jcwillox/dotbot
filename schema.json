@@ -298,6 +298,10 @@
           "type": "boolean",
           "default": true
         },
+        "capture": {
+          "type": "boolean",
+          "default": false
+        },
         "sudo": {
           "type": "boolean",
           "default": false
