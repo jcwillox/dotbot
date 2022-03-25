@@ -6,6 +6,7 @@ import (
 	"github.com/creasty/defaults"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
+	"github.com/jcwillox/dotbot/template"
 	"github.com/jcwillox/dotbot/utils"
 	"github.com/jcwillox/dotbot/utils/sudo"
 	"github.com/jcwillox/dotbot/yamltools"
@@ -77,6 +78,11 @@ func (b LinkBase) RunAll() error {
 }
 
 func (c LinkConfig) Run() error {
+	err := template.RenderField(&c.Path, &c.Source)
+	if err != nil {
+		return err
+	}
+
 	sourceStat, err := os.Lstat(c.Source)
 	if os.IsNotExist(err) {
 		return errors.New("source does not exist")
