@@ -59,6 +59,7 @@ func getDirective(key string) Plugin {
 		"sharkdp":  &SharkdpBase{},
 		"shell":    &ShellBase{},
 		"system":   &SystemBase{},
+		"vars":     &VarsBase{},
 	}[key]
 	if !present {
 		return nil

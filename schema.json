@@ -54,6 +54,9 @@
         },
         {
           "$ref": "#/$defs/system"
+        },
+        {
+          "$ref": "#/$defs/vars"
         }
       ]
     },
@@ -776,6 +779,31 @@
           "$ref": "#/$defs/plugin-list"
         }
       }
+    },
+    "vars": {
+      "type": "object",
+      "required": [
+        "vars"
+      ],
+      "properties": {
+        "vars": {
+          "oneOf": [
+            {
+              "$ref": "#/$defs/vars-config"
+            },
+            {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "$ref": "#/$defs/vars-config"
+              }
+            }
+          ]
+        }
+      }
+    },
+    "vars-config": {
+      "type": "object"
     },
     "file-mode": {
       "type": [
