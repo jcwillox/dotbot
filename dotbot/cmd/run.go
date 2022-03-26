@@ -13,9 +13,10 @@ import (
 	"os"
 )
 
-var (
+var runFlags struct {
 	fromStdin bool
-)
+	file      string
+}
 
 var runCmd = &cobra.Command{
 	Use:       "run [<directive>] [<key=value...>]",
@@ -45,7 +46,7 @@ var runCmd = &cobra.Command{
 			}
 		} else {
 			_ = utils.ChBaseDir()
-			if fromStdin {
+			if runFlags.fromStdin {
 				data, err := io.ReadAll(os.Stdin)
 				if err != nil {
 					log.Panicln("Failed reading from std-input", err)
@@ -55,6 +56,12 @@ var runCmd = &cobra.Command{
 					log.Fatalln("Failed parsing config from std-input", err)
 				}
 				config.RunAll(true)
+			} else if runFlags.file != "" {
+				config, err := plugins.ReadConfig(runFlags.file)
+				if err != nil {
+					log.Fatalln("config file not found:", err)
+				}
+				config.RunAll(true)
 			}
 		}
 	},
@@ -62,5 +69,6 @@ var runCmd = &cobra.Command{
 
 func init() {
 	rootCmd.AddCommand(runCmd)
-	runCmd.Flags().BoolVar(&fromStdin, "stdin", false, "read config from std-input")
+	runCmd.Flags().BoolVar(&runFlags.fromStdin, "stdin", false, "read config from std-input")
+	runCmd.Flags().StringVarP(&runFlags.file, "file", "f", "", "run specified config file")
 }
