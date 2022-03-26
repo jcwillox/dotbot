@@ -83,7 +83,8 @@ func (c LinkConfig) Run() error {
 		return err
 	}
 
-	sourceStat, err := os.Lstat(c.Source)
+	source := utils.ExpandUser(c.Source)
+	sourceStat, err := os.Lstat(source)
 	if os.IsNotExist(err) {
 		return errors.New("source does not exist")
 	}
@@ -167,7 +168,7 @@ func (c LinkConfig) Run() error {
 		return os.ErrPermission
 	}
 
-	absSource, _ := filepath.Abs(c.Source)
+	absSource, _ := filepath.Abs(source)
 	if !store.DryRun {
 		err := os.Symlink(absSource, path)
 		if err != nil {
