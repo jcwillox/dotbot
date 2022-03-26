@@ -110,6 +110,23 @@ func (c ExtractConfig) Run() error {
 		if err != nil {
 			return err
 		}
+
+		// remove and create destination
+		if !store.DryRun {
+			dest := utils.ExpandUser(item.Path)
+			dest, _, _ = strings.Cut(dest, "/#/")
+			if item.Replace {
+				err := os.RemoveAll(dest)
+				if err != nil {
+					return err
+				}
+			}
+			err := os.MkdirAll(dest, os.ModePerm)
+			if err != nil {
+				return err
+			}
+		}
+
 	}
 	output := log.NewMaxLineWriter(10)
 	w, _ := f.(archiver.Walker)
@@ -140,13 +157,6 @@ func (c ExtractConfig) Run() error {
 						return nil
 					}
 					dest = path.Join(dest, stripped)
-				}
-
-				if item.Replace {
-					err := os.RemoveAll(dest)
-					if err != nil {
-						return err
-					}
 				}
 
 				if !store.DryRun {
