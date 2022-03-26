@@ -11,14 +11,14 @@ import (
 
 type SystemBase []SystemConfig
 type SystemConfig struct {
-	OS       FlatList
-	Arch     FlatList
-	Platform FlatList
-	Family   FlatList
-	Libc     FlatList
-	Distro   FlatList
-	IsRoot   bool `yaml:"is_root"`
-	CanSudo  bool `yaml:"can_sudo"`
+	OS       FlatList `yaml:",omitempty"`
+	Arch     FlatList `yaml:",omitempty"`
+	Platform FlatList `yaml:",omitempty"`
+	Family   FlatList `yaml:",omitempty"`
+	Libc     FlatList `yaml:",omitempty"`
+	Distro   FlatList `yaml:",omitempty"`
+	IsRoot   bool     `yaml:"is_root"`
+	CanSudo  bool     `yaml:"can_sudo"`
 	Then     PluginList
 }
 
@@ -66,7 +66,7 @@ func (c SystemConfig) Run() bool {
 	if c.IsRoot && !sudo.IsRoot() {
 		return false
 	}
-	if c.CanSudo && !sudo.CanSudo() {
+	if !c.IsRoot && c.CanSudo && !sudo.CanSudo() {
 		return false
 	}
 	c.Then.RunAll()

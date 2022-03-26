@@ -26,7 +26,7 @@ var extractLogger = log.NewBasicLogger("EXTRACT")
 
 type ExtractBase []*ExtractConfig
 type ExtractConfig struct {
-	Archive string
+	Archive string `yaml:",omitempty"`
 	Items   ExtractItems
 }
 
@@ -48,6 +48,12 @@ func (c *ExtractConfig) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.MapSplitKeyVal(n, "archive", "items")
 	type ExtractConfigT ExtractConfig
 	return n.Decode((*ExtractConfigT)(c))
+}
+
+func (c *ExtractConfig) MarshalYAML() (interface{}, error) {
+	archive := c.Archive
+	c.Archive = ""
+	return map[string]ExtractItems{archive: c.Items}, nil
 }
 
 func (c *ExtractItems) UnmarshalYAML(n *yaml.Node) error {
@@ -88,7 +94,12 @@ func (b ExtractBase) RunAll() error {
 }
 
 func (c ExtractConfig) Run() error {
+	err := template.RenderField(&c.Archive)
+	if err != nil {
+		return err
+	}
 	archive := utils.ExpandUser(c.Archive)
+
 	f, err := archiver.ByExtension(archive)
 	if err != nil {
 		return err
