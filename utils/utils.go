@@ -157,7 +157,7 @@ func GetLocal() string {
 	if sudo.CanSudo() {
 		return "/usr/local"
 	}
-	return "~/.local"
+	return filepath.Join(store.HomeDirectory, ".local")
 }
 
 func ExecutablePath() string {
