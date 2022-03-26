@@ -72,48 +72,37 @@ func (c SharkdpConfig) Run() error {
 		} else {
 			asset += "-gnu"
 		}
-
-		var items ExtractItems
+		local := utils.GetLocal()
+		items := ExtractItems{
+			{
+				Source: asset + "/" + name,
+				Path:   local + "/bin",
+			},
+			{
+				Source: asset + "/autocomplete/" + name + ".zsh",
+				Path:   local + "/share/zsh/site-functions/#/_" + name,
+			},
+			{
+				Source: asset + "/autocomplete/_" + name,
+				Path:   local + "/share/zsh/site-functions",
+			},
+			{
+				Source: asset + "/" + name + ".1",
+				Path:   local + "/share/man/man1",
+			},
+		}
 		if sudo.CanSudo() {
-			items = ExtractItems{
-				{
-					Source: asset + "/" + name,
-					Path:   "/usr/local/bin",
-				},
-				{
-					Source: asset + "/autocomplete/" + name + ".zsh",
-					Path:   "/usr/local/share/zsh/site-functions/#/_" + name,
-				},
-				{
-					Source: asset + "/autocomplete/_" + name,
-					Path:   "/usr/local/share/zsh/site-functions",
-				},
-				{
+			items = append(items,
+				&ExtractItem{
 					Source: asset + "/autocomplete/" + name + ".fish",
 					Path:   "/usr/share/fish/completions",
 				},
-				{
+				&ExtractItem{
 					Source: asset + "/autocomplete/" + name + ".bash",
 					Path:   "/etc/bash_completion.d/#/" + name,
 				},
-				{
-					Source: asset + "/" + name + ".1",
-					Path:   "/usr/local/share/man/man1",
-				},
-			}
-		} else {
-			items = ExtractItems{
-				{
-					Source: asset + "/" + name,
-					Path:   "~/.local/bin",
-				},
-				{
-					Source: asset + "/" + name + ".1",
-					Path:   "~/.local/share/man/man1",
-				},
-			}
+			)
 		}
-
 		return InstallConfig{
 			Name: name,
 			Url:  url,

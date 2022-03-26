@@ -25,6 +25,7 @@ var funcs = map[string]interface{}{
 	"IsRoot":       sudo.IsRoot,
 	"CanSudo":      sudo.CanSudo,
 	"OnPath":       utils.OnPath,
+	"Local":        utils.GetLocal,
 	"Which": func(file string) string {
 		path, _ := execabs.LookPath(file)
 		return path

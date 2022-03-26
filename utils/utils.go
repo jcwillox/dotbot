@@ -5,6 +5,7 @@ import (
 	"errors"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
+	"github.com/jcwillox/dotbot/utils/sudo"
 	"github.com/shirou/gopsutil/host"
 	"golang.org/x/sys/execabs"
 	"os"
@@ -145,6 +146,18 @@ func isLibcMusl() (bool, error) {
 	} else {
 		return false, nil
 	}
+}
+
+func GetLocal() string {
+	if v, present := store.GetVar("Local"); present {
+		if s, ok := v.(string); ok && s != "" {
+			return v.(string)
+		}
+	}
+	if sudo.CanSudo() {
+		return "/usr/local"
+	}
+	return "~/.local"
 }
 
 func ExecutablePath() string {
