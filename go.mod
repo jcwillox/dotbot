@@ -3,6 +3,7 @@ module github.com/jcwillox/dotbot
 go 1.17
 
 require (
+	github.com/bmatcuk/doublestar/v4 v4.0.2
 	github.com/creasty/defaults v1.5.2
 	github.com/go-git/go-git/v5 v5.3.0
 	github.com/google/shlex v0.0.0-20191202100458-e7afc7fbc510

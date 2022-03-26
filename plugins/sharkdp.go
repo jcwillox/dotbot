@@ -82,7 +82,7 @@ func (c SharkdpConfig) Run() error {
 				},
 				{
 					Source: asset + "/autocomplete/" + name + ".zsh",
-					Path:   "/usr/local/share/zsh/site-functions#_" + name,
+					Path:   "/usr/local/share/zsh/site-functions/#/_" + name,
 				},
 				{
 					Source: asset + "/autocomplete/_" + name,
@@ -94,7 +94,7 @@ func (c SharkdpConfig) Run() error {
 				},
 				{
 					Source: asset + "/autocomplete/" + name + ".bash",
-					Path:   "/etc/bash_completion.d#" + name,
+					Path:   "/etc/bash_completion.d/#/" + name,
 				},
 				{
 					Source: asset + "/" + name + ".1",

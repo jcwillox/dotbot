@@ -36,7 +36,7 @@ func UpdaterUpdate() {
 	// grab current real path
 	exe := utils.ExecutablePath()
 	exeNew := filepath.Join(filepath.Dir(exe), "."+filepath.Base(exe)+".new")
-	exeExtractNew := filepath.Join(filepath.Dir(exe), "#."+filepath.Base(exe)+".new")
+	exeExtractNew := filepath.Join(filepath.Dir(exe), "/#/."+filepath.Base(exe)+".new")
 	exeOld := filepath.Join(filepath.Dir(exe), "."+filepath.Base(exe)+".old")
 
 	if !utils.IsWritable(exe) {

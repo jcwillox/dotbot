@@ -57,6 +57,9 @@
         },
         {
           "$ref": "#/$defs/vars"
+        },
+        {
+          "$ref": "#/$defs/extract"
         }
       ]
     },
@@ -526,10 +529,7 @@
               "$ref": "#/$defs/file-mode"
             },
             "extract": {
-              "type": [
-                "array",
-                "object"
-              ]
+              "$ref": "#/$defs/extract-base"
             }
           }
         },
@@ -609,10 +609,7 @@
             "$ref": "#/$defs/file-mode"
           },
           "extract": {
-            "type": [
-              "array",
-              "object"
-            ]
+            "$ref": "#/$defs/extract-base"
           }
         }
       }
@@ -804,6 +801,60 @@
     },
     "vars-config": {
       "type": "object"
+    },
+    "extract": {
+      "type": "object",
+      "required": [
+        "extract"
+      ],
+      "properties": {
+        "extract": {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/extract-base"
+          }
+        }
+      }
+    },
+    "extract-base": {
+      "oneOf": [
+        {
+          "$ref": "#/$defs/extract-config"
+        },
+        {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "$ref": "#/$defs/extract-config"
+          }
+        }
+      ]
+    },
+    "extract-config": {
+      "type": "object",
+      "additionalProperties": {
+        "type": [
+          "object",
+          "string"
+        ],
+        "required": [
+          "path"
+        ],
+        "properties": {
+          "path": {
+            "type": "string"
+          },
+          "strip": {
+            "type": "integer",
+            "default": 0
+          },
+          "replace": {
+            "type": "boolean",
+            "default": false,
+            "description": "Will delete the destination before extracting to it"
+          }
+        }
+      }
     },
     "file-mode": {
       "type": [

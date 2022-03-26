@@ -4,6 +4,7 @@ import (
 	"archive/tar"
 	"errors"
 	"fmt"
+	"github.com/bmatcuk/doublestar/v4"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
 	"github.com/jcwillox/dotbot/template"
@@ -31,10 +32,10 @@ type ExtractConfig struct {
 
 type ExtractItems []*ExtractItem
 type ExtractItem struct {
-	Source string `yaml:",omitempty"`
-	Path   string
-	Strip  int
-	Mode   os.FileMode
+	Source  string `yaml:",omitempty"`
+	Path    string
+	Strip   int
+	Replace bool
 }
 
 func (b *ExtractBase) UnmarshalYAML(n *yaml.Node) error {
@@ -99,6 +100,7 @@ func (c ExtractConfig) Run() error {
 			return err
 		}
 	}
+	output := log.NewMaxLineWriter(10)
 	w, _ := f.(archiver.Walker)
 	err = w.Walk(archive, func(f archiver.File) error {
 		hName := getHeaderName(f)
@@ -106,22 +108,22 @@ func (c ExtractConfig) Run() error {
 			return errors.New("invalid/unsupported archive file header")
 		}
 		for _, item := range c.Items {
-			var dest, name string
 			source := item.Source
-			parts := strings.SplitN(utils.ExpandUser(item.Path), "#", 2)
-			dest = parts[0]
-			if len(parts) > 1 {
-				name = parts[1]
-			}
+			dest := utils.ExpandUser(item.Path)
 
-			if matched, _ := filepath.Match(source, hName); matched {
+			if matched, _ := doublestar.Match(source, hName); matched {
+				// check if source is a wildcard path
 				if isConstantMatch(source) {
-					if name != "" {
-						dest = filepath.Join(dest, name)
+					// exact path so handle new-name and use `dest` path
+					// split <path> and <new-name>
+					parts := strings.SplitN(dest, "/#/", 2)
+					if len(parts) > 1 {
+						dest = filepath.Join(parts[0], parts[1])
 					} else {
-						dest = filepath.Join(dest, filepath.Base(source))
+						dest = filepath.Join(parts[0], filepath.Base(source))
 					}
 				} else {
+					// wildcard path so handle strip components and use `dest` as the base path
 					stripped := stripComponents(hName, item.Strip)
 					if stripped == "" {
 						return nil
@@ -129,15 +131,24 @@ func (c ExtractConfig) Run() error {
 					dest = path.Join(dest, stripped)
 				}
 
-				if store.DryRun {
-					err := extractFile(f, dest)
+				if item.Replace {
+					err := os.RemoveAll(dest)
 					if err != nil {
-						extractLogger.TagC(emerald.Red, "failed").Path(emerald.HighlightPath(hName, f.Mode()), emerald.HighlightPathStat(dest, nil))
 						return err
 					}
 				}
 
-				emerald.Print("[", emerald.Green, "+", emerald.Reset, "] ", emerald.HighlightPath(hName, f.Mode()), "\n")
+				if !store.DryRun {
+					err := extractFile(f, dest)
+					if err != nil {
+						extractLogger.TagC(emerald.Red, "failed").Path(
+							emerald.HighlightPath(hName, f.Mode()), emerald.HighlightPathStat(dest, nil),
+						)
+						return err
+					}
+				}
+
+				fmt.Fprint(output, "[", emerald.Green, "+", emerald.Reset, "] ", emerald.HighlightPath(dest, f.Mode()), "\n")
 			}
 		}
 		return nil
@@ -181,6 +192,8 @@ func extractFile(f archiver.File, destination string) error {
 
 func untarFile(f archiver.File, destination string, hdr *tar.Header) error {
 	switch hdr.Typeflag {
+	case tar.TypeDir:
+		return os.Mkdir(destination, f.Mode())
 	case tar.TypeReg, tar.TypeChar, tar.TypeBlock, tar.TypeFifo, tar.TypeGNUSparse:
 		return writeNewFile(destination, f, f.Mode())
 	case tar.TypeXGlobalHeader:
