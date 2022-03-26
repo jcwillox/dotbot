@@ -23,18 +23,28 @@ type InstallBase []InstallConfig
 type InstallConfig struct {
 	Name     string
 	Url      string
-	Version  string
+	Version  InstallVersion
 	Download *DownloadConfig
 	Shell    *ShellConfig
 	Sudo     bool
 	TrySudo  bool `yaml:"try_sudo"`
 	Then     PluginList
 }
+type InstallVersion struct {
+	Url   string `yaml:",omitempty"`
+	Regex string
+}
 
 func (b *InstallBase) UnmarshalYAML(n *yaml.Node) error {
 	n = yamltools.EnsureList(n)
 	type InstallBaseT InstallBase
 	return n.Decode((*InstallBaseT)(b))
+}
+
+func (c *InstallVersion) UnmarshalYAML(n *yaml.Node) error {
+	n = yamltools.ScalarToMapVal(n, "regex")
+	type VersionConfigT InstallVersion
+	return n.Decode((*VersionConfigT)(c))
 }
 
 func (b InstallBase) Enabled() bool {
@@ -69,21 +79,14 @@ func logInstall(title string, version string, latest string) {
 }
 
 func (c InstallConfig) Run() error {
-	var version string
-	var err error
-	if strings.HasPrefix(c.Url, "https://github.com/") && c.Version == "" {
-		version, err = GetGithubVersion(c.Url)
-	} else {
-		version, err = GetGenericVersion(c.Url, c.Version)
-	}
+	version, err := GetVersion(c.Url, &c.Version)
 	if err != nil {
 		return err
 	}
 	if version == "" {
 		return errors.New("latest version was empty")
 	}
-
-	current := store.Get(c.Url)
+	current := store.Get(c.Version.Url)
 
 	// abort early if we don't have root privileges
 	if c.Sudo && !sudo.CanSudo() {
@@ -120,7 +123,7 @@ func (c InstallConfig) Run() error {
 		}
 
 		if !store.DryRun {
-			store.SetSave(c.Url, version)
+			store.SetSave(c.Version.Url, version)
 		}
 	}
 	return nil
@@ -139,6 +142,18 @@ var noFollowClient = &http.Client{
 	},
 }
 
+func GetVersion(baseUrl string, config *InstallVersion) (string, error) {
+	if strings.HasPrefix(config.Url, "/") || config.Url == "" {
+		config.Url = baseUrl + config.Url
+	}
+	if config.Regex != "" {
+		return GetRegexVersion(*config)
+	} else if strings.HasPrefix(config.Url, "https://github.com/") {
+		return GetGithubVersion(config.Url)
+	}
+	return "", errors.New("could not determine method to extract version")
+}
+
 func GetGithubVersion(url string) (string, error) {
 	if !strings.HasSuffix(url, "/releases/latest") {
 		url = strings.TrimRight(url, "/") + "/releases/latest"
@@ -154,15 +169,15 @@ func GetGithubVersion(url string) (string, error) {
 	return strings.TrimPrefix(path.Base(location.Path), "v"), nil
 }
 
-func GetGenericVersion(url, versionTmpl string) (string, error) {
-	if template.HasTemplate(versionTmpl) {
-		return template.Parse(versionTmpl).Render()
+func GetRegexVersion(c InstallVersion) (string, error) {
+	if template.HasTemplate(c.Regex) {
+		return template.Parse(c.Regex).Render()
 	} else {
-		versionRegex, err := regexp.Compile(versionTmpl)
+		versionRegex, err := regexp.Compile(c.Regex)
 		if err != nil {
 			return "", err
 		}
-		resp, err := http.Get(url)
+		resp, err := http.Get(c.Url)
 		if err != nil {
 			return "", err
 		}
@@ -170,7 +185,7 @@ func GetGenericVersion(url, versionTmpl string) (string, error) {
 		if err != nil {
 			return "", err
 		}
-		log.Debugln("fetching", url)
+		log.Debugln("fetching", c.Url)
 		matches := versionRegex.FindSubmatch(data)
 		for i, match := range matches {
 			log.Debugf("[match] %d: %s\n", i, match)

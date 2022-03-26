@@ -492,7 +492,15 @@
           "type": "string"
         },
         "version": {
-          "type": "string"
+          "type": ["string", "object"],
+          "properties": {
+            "url": {
+              "type": "string"
+            },
+            "regex": {
+              "type": "string"
+            }
+          }
         },
         "sudo": {
           "type": "boolean",
