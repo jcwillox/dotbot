@@ -275,6 +275,7 @@ func getBrewPackageVersion(pkg string) (installed string, latest string) {
 	var info struct {
 		Formulae []struct {
 			Name     string `json:"full_name"`
+			Outdated bool   `json:"outdated"`
 			Versions struct {
 				Stable string `json:"stable"`
 			} `json:"versions"`
@@ -300,6 +301,12 @@ func getBrewPackageVersion(pkg string) (installed string, latest string) {
 			}
 			if len(f.Installed) < 1 {
 				return "", f.Versions.Stable
+			}
+			// Some installed versions do not match the latest versions
+			// e.g. if a new formula version was released for the same application version
+			// Just return the installed version as the latest version if the formula is not outdated
+			if !f.Outdated {
+				return f.Installed[0].Version, f.Installed[0].Version
 			}
 			return f.Installed[0].Version, f.Versions.Stable
 		}
