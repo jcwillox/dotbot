@@ -37,7 +37,7 @@ jobs:
         uses: goreleaser/goreleaser-action@v2
         with:
           version: latest
-          args: release --rm-dist --skip-publish
+          args: release --clean --skip-publish
 
       - name: "Upload assets"
         env:
