@@ -1,3 +1,5 @@
+version: 2
+
 before:
   hooks:
     - go mod tidy
@@ -49,9 +51,7 @@ archives:
     format: zip
     files:
       - completions/dotbot.ps1
-    replacements:
-      386: x86
-      amd64: x64
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "amd64" }}x64{{- else if eq .Arch "386" }}i386{{- else }}{{ .Arch }}{{ end }}'
 
   - id: nix
     builds:
@@ -60,14 +60,10 @@ archives:
       - completions/dotbot.zsh
       - completions/dotbot.fish
       - completions/dotbot.sh
-    replacements:
-      386: i386
-    name_template: "{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "386" }}i386{{- else }}{{ .Arch }}{{ end }}'
 
 nfpms:
-  - file_name_template: '{{ .PackageName }}_{{ .Version }}_{{ .Arch }}'
-    replacements:
-      386: i386
+  - file_name_template: '{{ .PackageName }}_{{ .Version }}_{{- if eq .Arch "386" }}i386{{- else }}{{ .Arch }}{{ end }}'
     license: MIT
     maintainer: Joshua Cowie-Willox <joshwillox@gmail.com>
     homepage: https://github.com/jcwillox/dotbot
