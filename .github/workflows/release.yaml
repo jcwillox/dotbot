@@ -1,47 +1,86 @@
-name: "Publish"
+name: "Release"
 
 on:
-  release:
-    types: [ published ]
+  push:
+    branches:
+      - "beta"
+      - "alpha"
+  workflow_dispatch:
+    inputs:
+      draft:
+        type: boolean
+        description: "Draft release"
+        default: false
+      discussion:
+        type: boolean
+        description: "Create discussion"
+        default: false
+      release_type:
+        type: choice
+        description: "Release type"
+        default: "auto"
+        options:
+          - "auto"
+          - "patch"
+          - "minor"
+          - "major"
+
+env:
+  # renovate: datasource=github-releases depName=goreleaser packageName=goreleaser/goreleaser
+  GORELEASER_VERSION: 2.16.0
 
 jobs:
   publish:
-    name: Publish
+    name: "Publish"
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     steps:
       - name: "Checkout the repository"
-        uses: actions/checkout@v2
-        with:
-          fetch-depth: 0
+        uses: actions/checkout@v6
 
-      - name: "Extract engines"
-        id: engines
-        uses: ./.github/actions/engines
+      - name: "Setup QEMU"
+        uses: docker/setup-qemu-action@v4
+
+      - name: "Setup Docker Buildx"
+        uses: docker/setup-buildx-action@v4
+
+      - name: "Login to GitHub Container Registry"
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: "Setup pnpm"
+        uses: pnpm/action-setup@v6
+        with:
+          version: "latest"
+
+      - name: "Setup node"
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
 
       - name: "Setup go"
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v6
         with:
-          go-version: ${{ steps.engines.outputs.go }}
-
-      - name: "Cache dependencies"
-        uses: actions/cache@v2
-        with:
-          path: |
-            ~/go/pkg/mod
-            ~/.cache/go-build
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          go-version-file: go.mod
 
       - name: "Run GoReleaser"
-        uses: goreleaser/goreleaser-action@v6
+        uses: goreleaser/goreleaser-action@v7
         with:
-          version: latest
-          args: release --clean --skip=publish
+          version: ${{ env.GORELEASER_VERSION }}
+          install-only: true
 
-      - name: "Upload assets"
+      - name: "Release Package 📦"
+        run: pnpm dlx @jcwillox/semantic-release-config
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          cd dist/
-          gh release upload ${{ github.event.release.tag_name }} checksums.txt $(cat checksums.txt | cut -d ' ' -f 3)
+          SEMANTIC_RELEASE_GITHUB_DRAFT: ${{ inputs.draft }}
+          SEMANTIC_RELEASE_GITHUB_DISCUSSION: ${{ inputs.discussion }}
+          SEMANTIC_RELEASE_FORCE_RELEASE: ${{ inputs.release_type }}
+          SEMANTIC_RELEASE_CMD_PRE_PUBLISH: "goreleaser release --clean"
+          SEMANTIC_RELEASE_GITHUB_ASSETS: '["dist/checksums.txt", "dist/*.apk", "dist/*.deb", "dist/*.rpm", "dist/*.tar.gz", "dist/*.zip"]'

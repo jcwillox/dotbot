@@ -1,0 +1,5 @@
+FROM scratch
+ARG TARGETPLATFORM
+
+COPY $TARGETPLATFORM/dotbot /
+ENTRYPOINT ["/dotbot"]

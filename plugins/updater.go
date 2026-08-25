@@ -54,15 +54,8 @@ func UpdaterUpdate() {
 	ext := ".tar.gz"
 	archiveExt := ""
 	if runtime.GOOS == "windows" {
-		if arch == "amd64" {
-			arch = "x64"
-		} else if arch == "386" {
-			arch = "x86"
-		}
 		ext = ".zip"
 		archiveExt = ".exe"
-	} else if arch == "386" {
-		arch = "i386"
 	}
 	asset := "dotbot_" + latest + "_" + runtime.GOOS + "_" + arch + ext
 

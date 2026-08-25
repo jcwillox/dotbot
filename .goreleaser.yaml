@@ -1,43 +1,21 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
 version: 2
+
+release:
+  disable: true
 
 before:
   hooks:
     - go mod tidy
 
-snapshot:
-  name_template: "{{ .Version }}"
-
-checksum:
-  name_template: 'checksums.txt'
-
 builds:
-  - id: nix
-    env:
+  - env:
       - CGO_ENABLED=0
-      - GO386=softfloat
     goos:
       - linux
-      - darwin
-    goarch:
-      - "386"
-      - amd64
-      - arm
-      - arm64
-    flags:
-      - -trimpath
-    ldflags:
-      - -s -w -X github.com/jcwillox/dotbot/store.Version={{.Version}}
-    main: ./dotbot
-
-  - id: windows
-    env:
-      - CGO_ENABLED=0
-      - GO386=softfloat
-    goos:
       - windows
-    goarch:
-      - "386"
-      - amd64
+      - darwin
     flags:
       - -trimpath
     ldflags:
@@ -45,25 +23,22 @@ builds:
     main: ./dotbot
 
 archives:
-  - id: windows
-    builds:
-      - windows
-    format: zip
+  - formats: tar.gz
+    name_template: >-
+      {{ replace .ProjectName "-" "_" }}_
+      {{- .Version }}_
+      {{- .Os }}_
+      {{- .Arch }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+    # use zip for windows archives
+    format_overrides:
+      - goos: windows
+        formats: zip
     files:
-      - completions/dotbot.ps1
-    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "amd64" }}x64{{- else if eq .Arch "386" }}i386{{- else }}{{ .Arch }}{{ end }}'
-
-  - id: nix
-    builds:
-      - nix
-    files:
-      - completions/dotbot.zsh
-      - completions/dotbot.fish
-      - completions/dotbot.sh
-    name_template: '{{ .ProjectName }}_{{ .Version }}_{{ .Os }}_{{- if eq .Arch "386" }}i386{{- else }}{{ .Arch }}{{ end }}'
+      - completions/*
 
 nfpms:
-  - file_name_template: '{{ .PackageName }}_{{ .Version }}_{{- if eq .Arch "386" }}i386{{- else }}{{ .Arch }}{{ end }}'
+  - file_name_template: '{{ replace .ProjectName "-" "_" }}_{{ .Version }}_{{ .Arch }}'
     license: MIT
     maintainer: Joshua Cowie-Willox <joshwillox@gmail.com>
     homepage: https://github.com/jcwillox/dotbot
@@ -78,5 +53,57 @@ nfpms:
         dst: /usr/share/zsh/vendor-completions/_dotbot
       - src: completions/dotbot.fish
         dst: /usr/share/fish/vendor_completions.d/dotbot.fish
-      - src: completions/dotbot.sh
+      - src: completions/dotbot.bash
         dst: /etc/bash_completion.d/dotbot
+
+dockers_v2:
+  - &docker_base
+    id: scratch
+    images:
+      - ghcr.io/jcwillox/{{ .ProjectName }}
+    tags:
+      - "{{ .Version }}"
+      - "{{ .Major }}"
+      - "{{ .Major }}.{{ .Minor }}"
+      - latest
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    labels:
+      org.opencontainers.image.title: "{{ .ProjectName }}"
+      org.opencontainers.image.url: https://github.com/jcwillox/{{ .ProjectName }}
+      org.opencontainers.image.source: https://github.com/jcwillox/{{ .ProjectName }}
+      org.opencontainers.image.documentation: https://github.com/jcwillox/{{ .ProjectName }}/blob/main/README.md
+      org.opencontainers.image.version: "{{ .Version }}"
+      org.opencontainers.image.created: '{{ time "2006-01-02T15:04:05Z07:00" }}'
+      org.opencontainers.image.revision: "{{ .FullCommit }}"
+      org.opencontainers.image.licenses: MIT
+
+  - &python_base
+    <<: *docker_base
+    id: python3-14-alpine
+    dockerfile: Dockerfile-python
+    tags:
+      - "{{ .Version }}-python3.14-alpine"
+      - "{{ .Major }}-python3.14-alpine"
+      - "{{ .Major }}.{{ .Minor }}-python3.14-alpine"
+      - python3.14-alpine
+      - python3-alpine
+    build_args:
+      DISTRO: alpine
+      PYTHON_VERSION: "3.14"
+
+  - <<: *python_base
+    id: python3-14-trixie
+    tags:
+      - "{{ .Version }}-python3.14-trixie"
+      - "{{ .Major }}-python3.14-trixie"
+      - "{{ .Major }}.{{ .Minor }}-python3.14-trixie"
+      - python3.14-trixie
+      - python3-trixie
+    build_args:
+      DISTRO: trixie
+      PYTHON_VERSION: "3.14"
+
+checksum:
+  name_template: 'checksums.txt'
