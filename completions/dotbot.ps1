@@ -1,27 +1,21 @@
 # powershell completion for dotbot                               -*- shell-script -*-
 
-$cmdNames = @("dotbot")
-$cmdNames += Get-Alias -Definition $cmdNames -ErrorAction Ignore | ForEach-Object Name
-if ($env:DOTBOT_ALIASES) {
-    $cmdNames += $env:DOTBOT_ALIASES.Split(",")
+function __dotbot_debug {
+    if ($env:BASH_COMP_DEBUG_FILE) {
+        "$args" | Out-File -Append -FilePath "$env:BASH_COMP_DEBUG_FILE"
+    }
 }
 
-Register-ArgumentCompleter -CommandName $cmdNames -ScriptBlock {
+filter __dotbot_escapeStringWithSpecialChars {
+    $_ -replace '\s|#|@|\$|;|,|''|\{|\}|\(|\)|"|`|\||<|>|&','`$&'
+}
+
+Register-ArgumentCompleter -CommandName 'dotbot' -ScriptBlock {
     param(
             $WordToComplete,
             $CommandAst,
             $CursorPosition
         )
-
-    function __dotbot_debug {
-        if ($env:BASH_COMP_DEBUG_FILE) {
-            "$args" | Out-File -Append -FilePath "$env:BASH_COMP_DEBUG_FILE"
-        }
-    }
-
-    filter __dotbot_escapeStringWithSpecialChars {
-        $_ -replace '\s|#|@|\$|;|,|''|\{|\}|\(|\)|"|`|\||<|>|&','`$&'
-    }
 
     # Get the current command line and convert into a string
     $Command = $CommandAst.CommandElements
