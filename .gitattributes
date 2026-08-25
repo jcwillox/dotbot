@@ -1,0 +1,7 @@
+# normalise line endings to lf on all platforms
+* text=auto eol=lf
+
+# linguist overrides
+completions/* linguist-generated
+scripts/install-dotbot.sh linguist-vendored
+scripts/install-dotbot.ps1 linguist-vendored

@@ -1,5 +1,7 @@
-# https://taskfile.dev
-version: "3"
+# yaml-language-server: $schema=https://taskfile.dev/schema.json
+version: '3'
+
+interval: 500ms
 
 tasks:
   default:
@@ -24,21 +26,31 @@ tasks:
     silent: true
 
   build:
-    desc: Build local binary
-    vars:
-      GOOS: "{{if .GOOS}}{{.GOOS}}{{else}}{{OS}}{{end}}"
-      GOARCH: "{{if .GOARCH}}{{.GOARCH}}{{else}}{{ARCH}}{{end}}"
-      EXT: "{{if eq .GOOS \"windows\"}}.exe{{else}}{{end}}"
-    cmds:
-      - go build -o "dotbot.{{.GOOS}}.{{.GOARCH}}{{.EXT}}" ./dotbot
-    env:
-      GOOS: "{{.GOOS}}"
-      GOARCH: "{{.GOARCH}}"
+    cmd: go build ./dotbot
 
-  build-all:
-    desc: Build binaries for all platforms
-    cmds:
-      - goreleaser build --rm-dist --snapshot
+  build:watch:
+    cmd: go build ./dotbot
+    watch: true
+    sources:
+      - '**/*.go'
+    generates:
+      - dotbot{{exeExt}}
+    method: timestamp
+
+  build:linux:
+    env:
+      GOOS: linux
+      GOARCH: amd64
+    cmd: go build ./dotbot
+
+  build:darwin:
+    env:
+      GOOS: darwin
+      GOARCH: arm64
+    cmd: go build ./dotbot
+
+  build:all:
+    cmd: goreleaser release --clean --snapshot
 
   docker:
     desc: Build & run docker container
@@ -56,12 +68,11 @@ tasks:
     cmds:
       - python ./scripts/add_plugin.py {{.CLI_ARGS}}
 
-  completions:
+  gen:completions:
     desc: Regenerate completion files
     cmds:
-      - go build -o dotbot.completions ./dotbot
-      - dotbot.completions completion bash > ./completions/dotbot.sh
-      - dotbot.completions completion zsh > ./completions/dotbot.zsh
-      - dotbot.completions completion fish > ./completions/dotbot.fish
-      - dotbot.completions completion powershell > ./completions/dotbot.ps1
-      - "{{if eq OS \"windows\"}}cmd /c del{{else}}rm{{end}} dotbot.completions"
+      - go build ./dotbot
+      - ./dotbot{{exeExt}} completion bash > ./completions/dotbot.bash
+      - ./dotbot{{exeExt}} completion zsh > ./completions/dotbot.zsh
+      - ./dotbot{{exeExt}} completion fish > ./completions/dotbot.fish
+      - ./dotbot{{exeExt}} completion powershell > ./completions/dotbot.ps1

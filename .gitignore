@@ -11,6 +11,24 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-*.iml
+# Go workspace file
+go.work
+
+# local env files
+.env*.local
+.env.development
+
+# Misc
+node_modules/
+
+# IDE files
 .idea/
+*.iml
+/*.vbs
+
 dist/
+/*.log
+testdata/*
+
+# MkDocs
+site/

@@ -1,5 +1,11 @@
 # Dotbot
 
+[![GitHub Release](https://img.shields.io/github/v/release/jcwillox/dotbot?style=flat-square)](https://github.com/jcwillox/dotbot/releases/latest)
+[![GitHub go.mod Go version](https://img.shields.io/github/go-mod/go-version/jcwillox/dotbot?style=flat-square&label=go)](https://github.com/jcwillox/dotbot/blob/main/go.mod)
+[![License](https://img.shields.io/github/license/jcwillox/dotbot?style=flat-square)](https://github.com/jcwillox/dotbot/blob/main/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/jcwillox/dotbot?style=flat-square)](https://goreportcard.com/report/github.com/jcwillox/dotbot)
+
+
 *This project is still in active development don't expect everything to be working fully, and there will likely be breaking changes.*
 
 Dotbot is a powerful dotfiles manager and system bootstrapping tool, it is based on the original [Dotbot](https://github.com/anishathalye/dotbot) written in Python by [@anishathalye](https://github.com/anishathalye), but it has been rebuilt from the ground up in Go, its faster and already has a much wider set of features.
