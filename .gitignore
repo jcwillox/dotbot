@@ -27,6 +27,7 @@ node_modules/
 /*.vbs
 
 dist/
+.task/
 /*.log
 testdata/*
 
