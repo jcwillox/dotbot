@@ -21,7 +21,7 @@ Dotbot can even be used as a lightweight package manager installing the latest v
 ## Installation
 
 ```bash
-sh -c "$(curl -fsSL tinyurl.com/dotbot)"
+sh -c "$(curl -fsSL jcwillox.com/l/dotbot)"
 ```
 
 Adding `init <owner>` will also clone your dotfiles repo, then adding `--apply` will run dotbot after cloning.
@@ -29,17 +29,17 @@ Adding `init <owner>` will also clone your dotfiles repo, then adding `--apply` 
 If you only specify your username its assumed the repo is called `dotfiles`.
 
 ```bash
-sh -c "$(curl -fsSL tinyurl.com/dotbot)" -- init --apply <owner>[/<repo>]
+sh -c "$(curl -fsSL jcwillox.com/l/dotbot)" -- init --apply <owner>[/<repo>]
 ```
 
 **Windows**
 
 ```pwsh
-iwr -useb tinyurl.com/dotbot-ps1 | iex
+iwr -useb jcwillox.com/l/dotbot-ps1 | iex
 ```
 
 ```pwsh
-iwr -useb tinyurl.com/dotbot-ps1 | iex; dotbot init --apply <owner>[/<repo>]
+iwr -useb jcwillox.com/l/dotbot-ps1 | iex; dotbot init --apply <owner>[/<repo>]
 ```
 
 ## Usage

@@ -236,8 +236,8 @@ function unpack-file {
     You can specify a particular git tag using the -Tag option.
 
     Examples:
-    '$params = "-BinDir ~/bindir"', (iwr https://tinyurl.com/dotbot-ps1).Content | powershell -c -
-    '$params = "-Tag v1.8.10"', (iwr https://tinyurl.com/dotbot-ps1).Content | powershell -c -
+    '$params = "-BinDir ~/bindir"', (iwr https://jcwillox.com/l/dotbot-ps1).Content | powershell -c -
+    '$params = "-Tag v1.8.10"', (iwr https://jcwillox.com/l/dotbot-ps1).Content | powershell -c -
 #>
 function Install-Dotbot {
     [CmdletBinding(PositionalBinding=$false)]
