@@ -157,10 +157,10 @@ function get_goarch {
             return "arm64"
         }
         "X86" {
-            if ($os -eq "windows") { return "x86" } else { return "i386" }
+            return "386"
         }
         "X64" {
-            if ($os -eq "windows") { return "x64" } else { return "amd64" }
+            return "amd64"
         }
 
         default {
@@ -228,16 +228,16 @@ function unpack-file {
 
 <#
     .SYNOPSIS
-    Install the dotbot dotfile manager
+    Install dotbot
 
     .DESCRIPTION
-    Installs dotbot to the given directory, defaulting to ./bin
+    Installs dotbot to the given directory, defaulting to ~/.local/bin
 
     You can specify a particular git tag using the -Tag option.
 
     Examples:
-    '$params = "-BinDir ~/bindir"', (iwr https://git.io/dotbot.ps1).Content | powershell -c -
-    '$params = "-Tag v1.8.10"', (iwr https://git.io/dotbot.ps1).Content | powershell -c -
+    '$params = "-BinDir ~/bindir"', (iwr https://tinyurl.com/dotbot-ps1).Content | powershell -c -
+    '$params = "-Tag v1.8.10"', (iwr https://tinyurl.com/dotbot-ps1).Content | powershell -c -
 #>
 function Install-Dotbot {
     [CmdletBinding(PositionalBinding=$false)]
