@@ -37,6 +37,7 @@ jobs:
       contents: write
       issues: write
       pull-requests: write
+      packages: write
     steps:
       - name: "Checkout the repository"
         uses: actions/checkout@v6
