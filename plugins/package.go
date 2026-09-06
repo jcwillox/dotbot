@@ -183,6 +183,8 @@ func getOsPackager() string {
 	// MacOS has a binary called apt, but it's not the package manager, so brew needs to come first
 	case utils.OnPath("brew"):
 		return "brew"
+	case utils.OnPath("pacman"):
+		return "pacman"
 	case utils.OnPath("apt"):
 		return "apt"
 	case utils.OnPath("apk"):
