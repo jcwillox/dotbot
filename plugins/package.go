@@ -6,6 +6,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"strings"
+	"sync"
 
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
@@ -127,6 +129,22 @@ func (c PackageItem) InstallAll() error {
 				Stdout:   true,
 				Stderr:   true,
 				Sudo:     false,
+				MaxLines: 10,
+			}
+		}
+	case "pacman":
+		for _, pkg := range c.Packages {
+			version, latest := getPacmanPackageVersion(pkg)
+			logPackage(pkg, version, latest)
+			if version == latest || store.DryRun {
+				break
+			}
+			command = &utils.Command{
+				Command:  "pacman -S --noconfirm " + pkg,
+				Shell:    false,
+				Stdout:   true,
+				Stderr:   true,
+				Sudo:     true,
 				MaxLines: 10,
 			}
 		}
@@ -322,4 +340,36 @@ func getBrewPackageVersion(pkg string) (installed string, latest string) {
 	}
 
 	return
+}
+
+func getPacmanPackageVersion(pkg string) (installed string, latest string) {
+	var wg sync.WaitGroup
+
+	wg.Go(func() {
+		if out, err := execabs.Command("pacman", "-Q", pkg).Output(); err == nil {
+			fields := strings.Fields(string(out))
+			if len(fields) >= 2 {
+				installed = fields[1]
+			}
+		}
+	})
+
+	wg.Go(func() {
+		if out, err := execabs.Command("pacman", "-Si", pkg).Output(); err == nil {
+			scanner := bufio.NewScanner(strings.NewReader(string(out)))
+			for scanner.Scan() {
+				line := strings.TrimSpace(scanner.Text())
+				if strings.HasPrefix(line, "Version") {
+					parts := strings.SplitN(line, ":", 2)
+					if len(parts) == 2 {
+						latest = strings.TrimSpace(parts[1])
+						break
+					}
+				}
+			}
+		}
+	})
+
+	wg.Wait()
+	return installed, latest
 }

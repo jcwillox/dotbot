@@ -30,6 +30,7 @@ dist/
 .task/
 /*.log
 testdata/*
+dotbot-bin
 
 # MkDocs
 site/
