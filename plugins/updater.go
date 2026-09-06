@@ -2,15 +2,16 @@ package plugins
 
 import (
 	"fmt"
-	"github.com/jcwillox/dotbot/log"
-	"github.com/jcwillox/dotbot/store"
-	"github.com/jcwillox/dotbot/utils"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
 	"syscall"
+
+	"github.com/jcwillox/dotbot/log"
+	"github.com/jcwillox/dotbot/store"
+	"github.com/jcwillox/dotbot/utils"
 )
 
 func UpdaterUpdate() {
@@ -23,12 +24,14 @@ func UpdaterUpdate() {
 	}
 
 	// quick check assets have been published
-	head, err := http.Head(store.RepoUrl + "/releases/download/" + latest + "/checksums.txt")
+	head, err := http.Head(store.RepoUrl + "/releases/download/v" + latest + "/checksums.txt")
 	if err != nil {
 		log.Fatalln("failed checking if assets are available", err)
 	}
+	defer head.Body.Close()
+
+	// quietly ignore until assets have been published
 	if head.StatusCode == 404 {
-		// quietly ignore until assets have been published
 		return
 	}
 	logInstall("dotbot", store.Version, latest)
@@ -61,7 +64,7 @@ func UpdaterUpdate() {
 
 	// download archive
 	dl := DownloadConfig{
-		Url:  store.RepoUrl + "/releases/download/" + latest + "/" + asset,
+		Url:  store.RepoUrl + "/releases/download/v" + latest + "/" + asset,
 		Mode: 438,
 		Extract: ExtractItems{
 			{
