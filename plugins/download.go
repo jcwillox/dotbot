@@ -2,6 +2,14 @@ package plugins
 
 import (
 	"fmt"
+	"io"
+	"mime"
+	"net/http"
+	"os"
+	"path/filepath"
+	"strings"
+	"time"
+
 	"github.com/creasty/defaults"
 	"github.com/jcwillox/dotbot/log"
 	"github.com/jcwillox/dotbot/store"
@@ -13,13 +21,6 @@ import (
 	"github.com/vbauerster/mpb/v7"
 	"github.com/vbauerster/mpb/v7/decor"
 	"gopkg.in/yaml.v3"
-	"io"
-	"mime"
-	"net/http"
-	"os"
-	"path/filepath"
-	"strings"
-	"time"
 )
 
 var downloadLogger = log.NewBasicLogger("DOWNLOAD")
@@ -195,6 +196,9 @@ func (c *DownloadConfig) Run() error {
 		if err != nil {
 			return err
 		}
+
+		// bars with unknown total never auto-complete on EOF, causing p.Wait to block forever
+		bar.SetTotal(-1, true)
 
 		p.Wait()
 	} else {
