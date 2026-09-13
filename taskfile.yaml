@@ -41,7 +41,7 @@ tasks:
     env:
       GOOS: linux
       GOARCH: amd64
-    cmd: go build ./dotbot
+    cmd: go build -o ./dotbot-bin ./dotbot
 
   build:darwin:
     env:
@@ -55,7 +55,13 @@ tasks:
   docker:
     desc: Build & run docker container
     cmds:
-      - docker build -t dotbot .
+      - docker build -f Dockerfile-playground -t dotbot .
+      - docker run --rm -ti -v /etc/localtime:/etc/localtime:ro --name dotbot dotbot {{.CLI_ARGS}}
+
+  docker-arch:
+    desc: Build & run docker container
+    cmds:
+      - docker build -f Dockerfile-playground-arch -t dotbot .
       - docker run --rm -ti -v /etc/localtime:/etc/localtime:ro --name dotbot dotbot {{.CLI_ARGS}}
 
   clean:

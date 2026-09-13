@@ -1,0 +1,49 @@
+FROM golang:alpine AS build
+
+ENV CGO_ENABLED=0
+
+RUN apk add --no-cache git
+
+WORKDIR /app
+
+COPY go.mod go.sum ./
+RUN go mod download
+
+COPY . .
+
+RUN go build -o "dotbot.bin" ./dotbot
+
+FROM ghcr.io/astral-sh/uv:debian
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends sudo zsh bash-completion libpython3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# disable sudo warning
+RUN echo "Defaults lecture=never" >> /etc/sudoers
+
+# create user 'test' with password '1'
+RUN useradd -m -p $(openssl passwd -1 "1") test -s /bin/bash
+
+### COPY BINARY & COMPLETIONS ###
+COPY --from=build /app/dotbot.bin /usr/bin/dotbot
+RUN dotbot completion bash > /etc/bash_completion.d/dotbot \
+    && dotbot completion zsh > /usr/share/zsh/vendor-completions/_dotbot
+
+### COPY TESTDATA ###
+COPY testdata/dotfiles-remote /root/dotfiles
+RUN dotbot set directory /root/dotfiles
+
+USER test
+COPY --chown=test:test testdata/dotfiles-remote /home/test/dotfiles
+RUN dotbot set directory /home/test/dotfiles
+
+ENV USER=test \
+    TERM=xterm-256color \
+    DOTBOT_NO_UPDATE=1 \
+    DOTBOT_NO_UPDATE_REPO=1 \
+    DOTBOT_DEBUG=0
+
+WORKDIR /home/test
+
+CMD ["bash", "-l"]
