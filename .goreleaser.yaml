@@ -88,10 +88,9 @@ dockers_v2:
       - "{{ .Major }}-python3.14-alpine"
       - "{{ .Major }}.{{ .Minor }}-python3.14-alpine"
       - python3.14-alpine
-      - python3-alpine
-    build_args:
-      DISTRO: alpine
+    build_args: &python_args
       PYTHON_VERSION: "3.14"
+      DISTRO: alpine
 
   - <<: *python_base
     id: python3-14-trixie
@@ -100,10 +99,42 @@ dockers_v2:
       - "{{ .Major }}-python3.14-trixie"
       - "{{ .Major }}.{{ .Minor }}-python3.14-trixie"
       - python3.14-trixie
-      - python3-trixie
     build_args:
+      <<: *python_args
       DISTRO: trixie
-      PYTHON_VERSION: "3.14"
+
+  - <<: *python_base
+    id: python3-15-alpine
+    tags:
+      - "{{ .Version }}-python3.15-alpine"
+      - "{{ .Major }}-python3.15-alpine"
+      - "{{ .Major }}.{{ .Minor }}-python3.15-alpine"
+      - "{{ .Version }}-python-alpine"
+      - "{{ .Major }}-python-alpine"
+      - "{{ .Major }}.{{ .Minor }}-python-alpine"
+      - python3.15-alpine
+      - python3-alpine
+      - python-alpine
+    build_args:
+      <<: *python_args
+      PYTHON_VERSION: "3.15"
+
+  - <<: *python_base
+    id: python3-15-trixie
+    tags:
+      - "{{ .Version }}-python3.15-trixie"
+      - "{{ .Major }}-python3.15-trixie"
+      - "{{ .Major }}.{{ .Minor }}-python3.15-trixie"
+      - "{{ .Version }}-python-debian"
+      - "{{ .Major }}-python-debian"
+      - "{{ .Major }}.{{ .Minor }}-python-debian"
+      - python3.15-trixie
+      - python3-trixie
+      - python-debian
+    build_args:
+      <<: *python_args
+      DISTRO: trixie
+      PYTHON_VERSION: "3.15"
 
 checksum:
   name_template: 'checksums.txt'
